@@ -13,7 +13,7 @@ Prof. Simone Pierini Facini Rocha
 - 🧑‍💼 Felipe Antônio de Oliveira Almeida - 22130
 - 🧑‍💼 Leonardo Ribeiro Gonzaga de Lima - 23579 
 - 🧑‍💼 João Pedro Cassiano de Brito - 22138 
-- 👩‍💼 Virgínia da Silva - 22153 
+- 🧑‍💼 Virgínia da Silva - 22153 
 
 ## 📱 Gerenciamento de comandas usando Flutter
 
@@ -35,11 +35,11 @@ Esta aplicação tem a finalidade de gerenciar pedidos de mesas em um ambiente d
 
 - 📆 15/08/2024: Apresentação da proposta - ✅ aprovada
 - 📆 22/08/2024:
-  - 🏗️ Criar o projeto no GitHub
-  - 🎨 Criar as telas no Figma
-  - 📊 Criar o Kanban no Trello
-  - 📝 Criar os backlogs no Kanban
-  - 🗂️ Criar MER e tabelas
+  - Criar o projeto no GitHub
+  - Criar as telas no Figma
+  - Criar o Kanban no Trello
+  - Criar os backlogs no Kanban
+  - Criar MER e tabelas
 
 </div>
 
