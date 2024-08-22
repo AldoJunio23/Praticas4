@@ -49,5 +49,5 @@ Esta aplicação tem a finalidade de gerenciar pedidos de mesas em um ambiente d
 - 📋 Trello: [Acessar Kanban](https://trello.com/invite/b/66c724a992b706a4ecb5a5da/ATTI3724d1767701307140dd26b38195442cFFA40C6E/praticas4-kanban)
 - 📊 UML - Lucid: [Acessar Diagrama](https://lucid.app/lucidchart/ab9b5bb0-d981-44fe-ac61-a992ed142925/edit?viewport_loc=-1362%2C-1056%2C734%2C350%2C0_0&invitationId=inv_455e5158-b963-48c6-b624-41f62769c085)
 - 🎨 Figma: [Acessar Design](https://www.figma.com/design/85sQ8jqsuZTXcMEsSnAJAI/Gerenciamento-de-Comandas?node-id=0-1&t=80AKtcMWLgbFROZC-1)
-
+- 📄 Google Docs: [Acessar Documento](https://docs.google.com/document/d/15eSt34QS5KYJvasOgg3acgc5SpumW1CFsW2jhSYPbLE/edit?usp=sharing)
 </div>
