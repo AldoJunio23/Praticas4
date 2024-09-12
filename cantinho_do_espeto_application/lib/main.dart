@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_praticas/TelaCadastro.dart';
+import 'package:flutter_application_praticas/TelaEsqueci.dart';
 
 void main() {
   runApp(const MyApp());
@@ -151,9 +152,29 @@ class HomePage extends StatelessWidget {
                             // aqui colocamos o PasswordField:
                             const PasswordField(),
                             const Padding(padding: const EdgeInsets.all(10)),
-                            const Text(
-                              "Esqueceu sua senha? Clique aqui",
-                              style: TextStyle(color: Colors.grey),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const TelaEsqueci(),
+                                    ),
+                                  );
+                                },
+                                child: const AnimatedDefaultTextStyle(
+                                  duration: Duration(milliseconds: 200),
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  child: Text(
+                                    "Esqueceu a senha? Clique aqui",
+                                  ),
+                                ),
+                              ),
                             ),
                             const SizedBox(
                               height: 10,
