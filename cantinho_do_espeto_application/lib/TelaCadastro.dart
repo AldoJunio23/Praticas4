@@ -95,7 +95,7 @@ class TelaCadastroState extends State<TelaCadastro> {
                 ),
               ],
             ),
-            const SizedBox(height: 30),r
+            const SizedBox(height: 30),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 15),
               child: TextField(
