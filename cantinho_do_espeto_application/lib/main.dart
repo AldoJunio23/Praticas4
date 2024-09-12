@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/TelaCadastro.dart';
 
 void main() {
   runApp(const MyApp());
@@ -74,7 +75,7 @@ class HomePage extends StatelessWidget {
 
                   Center(
                     child: Text(
-                      "Login - 08.09.2024",
+                      "Login",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 40,
@@ -165,7 +166,6 @@ class HomePage extends StatelessWidget {
                             ),
                             // aqui colocamos o PasswordField:
                             const PasswordField(),
-                            const Text("App atual - 08.09.2024"),
                             const Text(
                               "Esqueceu sua senha? Clique aqui",
                               style: TextStyle(color: Colors.grey),
@@ -173,20 +173,41 @@ class HomePage extends StatelessWidget {
                             const SizedBox(
                               height: 10,
                             ),
-                            const Text("Ainda não possui cadastro? Clique aqui",
-                                style: TextStyle(color: Colors.grey)),
-                            const SizedBox(
-                              height: 25.5,
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const TelaCadastro(),
+                                    ),
+                                  );
+                                },
+                                child: const AnimatedDefaultTextStyle(
+                                  duration: Duration(milliseconds: 200),
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  child: Text(
+                                    "Ainda não possui cadastro? Clique aqui",
+                                  ),
+                                ),
+                              ),
                             ),
                             Container(
                               height: 50,
                               width: 250,
                               margin:
-                                  const EdgeInsets.symmetric(horizontal: 50),
+                                  const EdgeInsets.all(25),
                               decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(50),
                                   color: Colors.orange[900]!),
                               child: const Center(
+                                widthFactor: 250,
+                                heightFactor: 50,
                                 child: Text("Login",
                                     style: TextStyle(
                                       color: Colors.white,
