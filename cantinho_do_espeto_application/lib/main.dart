@@ -144,28 +144,13 @@ class HomePage extends StatelessWidget {
                                     border: InputBorder.none),
                               ),
                             ),
-                            const SizedBox(
-                              height: 25.5,
-                            ),
-
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey[200]!)),
-                              ),
-                              child: const TextField(
-                                decoration: InputDecoration(
-                                    hintText: "Password",
-                                    hintStyle: TextStyle(color: Colors.grey),
-                                    border: InputBorder.none),
-                              ),
-                            ),
+                            
                             const SizedBox(
                               height: 25.5,
                             ),
                             // aqui colocamos o PasswordField:
                             const PasswordField(),
+                            const Padding(padding: const EdgeInsets.all(10)),
                             const Text(
                               "Esqueceu sua senha? Clique aqui",
                               style: TextStyle(color: Colors.grey),

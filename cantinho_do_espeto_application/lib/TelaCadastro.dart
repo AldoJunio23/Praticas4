@@ -65,6 +65,7 @@ class TelaCadastroState extends State<TelaCadastro> {
             ],
           ),
         ),
+        
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
@@ -93,70 +94,110 @@ class TelaCadastroState extends State<TelaCadastro> {
                     color: Colors.white,
                   ),
                 ),
+                Padding(padding: EdgeInsets.all(10)),
               ],
             ),
-            const SizedBox(height: 30),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              child: TextField(
-                controller: _nomeController,
-                decoration: const InputDecoration(
-                  labelText: "Nome do Usuário",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(60),
+                    topRight: Radius.circular(60),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: <Widget>[
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color.fromRGBO(225, 95, 27, .3),
+                              blurRadius: 20,
+                              offset: Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            const SizedBox(height: 30),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              child: TextField(
+                                controller: _nomeController,
+                                decoration: const InputDecoration(
+                                  labelText: "Nome do Usuário",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              child: TextField(
+                                controller: _emailController,
+                                keyboardType: TextInputType.emailAddress,
+                                decoration: const InputDecoration(
+                                  labelText: "Email",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              child: TextField(
+                                controller: _senhaController,
+                                obscureText: true, // Esconde a senha
+                                decoration: const InputDecoration(
+                                  labelText: "Senha",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 15),
+                              child: TextField(
+                                controller: _confSenhaController,
+                                obscureText: true, // Esconde a senha
+                                decoration: const InputDecoration(
+                                  labelText: "Confirmar Senha",
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 25),
+                              child: ElevatedButton(
+                                onPressed: _criarConta,
+                                child: const Text(
+                                  "Criar",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              child: TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: "Email",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              child: TextField(
-                controller: _senhaController,
-                obscureText: true, // Esconde a senha
-                decoration: const InputDecoration(
-                  labelText: "Senha",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              child: TextField(
-                controller: _confSenhaController,
-                obscureText: true, // Esconde a senha
-                decoration: const InputDecoration(
-                  labelText: "Confirmar Senha",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                  ),
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 25),
-              child: ElevatedButton(
-                onPressed: _criarConta,
-                child: const Text(
-                  "Criar",
-                  style: TextStyle(fontSize: 20),
-                ),
-              ),
-            ),
+            )
           ],
         ),
       ),
