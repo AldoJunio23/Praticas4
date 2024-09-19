@@ -1,0 +1,1 @@
+ C:\\Users\\u22153\\Documents\\GitHub\\Praticas4\\tela_inicio\\.dart_tool\\flutter_build\\5739340fc11f31fe1fe243faddd82ab5\\native_assets.yaml: 
