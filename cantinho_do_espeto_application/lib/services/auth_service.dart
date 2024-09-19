@@ -48,4 +48,20 @@ class AuthService {
       print('Erro ao fazer logout: $e');
     }
   }
+
+  Future<void> resetPassword({required String email}) async {
+  try {
+    // Chama o método do Firebase para enviar o link de redefinição de senha
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: email.trim());
+      print('Link de redefinição de senha enviado para o e-mail!');
+  } on FirebaseAuthException catch (e) {
+    // Tratamento de erros comuns
+    if (e.code == 'user-not-found') {
+      print('Usuário não encontrado para este e-mail.');
+    } else {
+      print('Erro: ${e.message}');
+    }
+  }
+
+  }
 }

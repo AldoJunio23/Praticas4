@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-//import 'package:firebase_auth/firebase_auth.dart'; // Importar o FirebaseAuth
+import 'package:flutter_application_praticas/services/auth_service.dart';
 
 class TelaEsqueci extends StatefulWidget {
   const TelaEsqueci({super.key});
@@ -14,6 +14,8 @@ class _TelaEsqueciState extends State<TelaEsqueci> {
   bool _isLoading = false;
   String _statusMessage = '';
 
+  final AuthService _authService = AuthService();
+
   // Método para enviar o link de redefinição de senha
   Future<void> _resetPassword() async {
     setState(() {
@@ -21,31 +23,26 @@ class _TelaEsqueciState extends State<TelaEsqueci> {
       _statusMessage = '';
     });
 
-    /*try {
-      // Chama o método do Firebase para enviar o link de redefinição de senha
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: _emailController.text.trim());
+    try {
+      
+      await _authService.resetPassword(email: _emailController.text.trim());
       setState(() {
         _statusMessage = 'Link de redefinição de senha enviado para o e-mail!';
         _isLoading = false;
       });
-    } on FirebaseAuthException catch (e) {
-      // Tratamento de erros comuns
+    } catch (e) {
       setState(() {
-        if (e.code == 'user-not-found') {
-          _statusMessage = 'Usuário não encontrado para este e-mail.';
-        } else {
-          _statusMessage = 'Erro: ${e.message}';
-        }
+        _statusMessage = 'Erro ao enviar o link: $e';
         _isLoading = false;
       });
-    }*/
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.orange[900], // Cor do AppBar da tela de login
+        backgroundColor: Colors.orange[900],
         elevation: 0,
         title: const Text(
           "Redefinir Senha",
@@ -60,9 +57,9 @@ class _TelaEsqueciState extends State<TelaEsqueci> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             colors: [
-              Colors.orange[900]!, // Cor superior da tela de login
-              Colors.orange[800]!, // Cor intermediária da tela de login
-              Colors.orange[400]!, // Cor inferior da tela de login
+              Colors.orange[900]!,
+              Colors.orange[800]!,
+              Colors.orange[400]!,
             ],
           ),
         ),
@@ -125,14 +122,34 @@ class _TelaEsqueciState extends State<TelaEsqueci> {
                       ),
                     ),
               const SizedBox(height: 20),
-              Text(
-                _statusMessage,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: _statusMessage.contains('Erro') ? Colors.red : Colors.green,
+              if (_statusMessage.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 2,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    _statusMessage,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: _statusMessage.contains('Erro')
+                          ? Colors.red
+                          : Colors.green,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
             ],
           ),
         ),

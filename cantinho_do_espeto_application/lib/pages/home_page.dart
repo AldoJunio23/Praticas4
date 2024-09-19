@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_praticas/pages/cadastro_page.dart';
 import 'package:flutter_application_praticas/pages/esquecisenha_page.dart';
+import 'package:flutter_application_praticas/pages/inicio_page.dart';
 import 'package:flutter_application_praticas/services/auth_service.dart';
 
 class HomePage extends StatefulWidget {
@@ -24,13 +24,8 @@ class HomePageState extends State<HomePage> {
 
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
- 
-    print('email: $email');
-    print('password: $password');
-    
 
     try {
-      // Aqui usamos a função de login do AuthService
       final user = await _authService.login(
         email: email,
         senha: password,
@@ -38,7 +33,12 @@ class HomePageState extends State<HomePage> {
 
       if (user != null) {
         print("Login bem-sucedido!");
-        // Aqui você pode navegar para outra página ou mostrar uma mensagem de sucesso
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => TelaInicio(),
+          ),
+        );
       } else {
         setState(() {
           _errorMessage = "Erro de login: usuário não encontrado";
@@ -69,42 +69,17 @@ class HomePageState extends State<HomePage> {
           ),
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            const SizedBox(
-              height: 20,
-            ),
-            const Padding(
-              padding: EdgeInsets.all(20),
-              child: Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Center(
-                    child: Text(
-                      "Login",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Center(
-                    child: Text(
-                      "Bem-Vindo ao Cantinho do Espeto",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
+            // Logo na parte superior
+            Center(
+              child: Image.asset(
+                'assets/logo.png',
+                height: 300, // Ajuste a altura conforme necessário
+                width: 300,  // Ajuste a largura conforme necessário
               ),
             ),
+            const SizedBox(height: 20),
+            // Seção de login
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
@@ -118,9 +93,7 @@ class HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: <Widget>[
-                      const SizedBox(
-                        height: 20,
-                      ),
+                      const SizedBox(height: 20),
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
@@ -136,129 +109,63 @@ class HomePageState extends State<HomePage> {
                         ),
                         child: Column(
                           children: <Widget>[
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom:
-                                      BorderSide(color: Colors.grey[200]!),
-                                ),
-                              ),
-                              child: TextField(
-                                controller: _emailController,
-                                decoration: const InputDecoration(
-                                    hintText: "Email",
-                                    hintStyle: TextStyle(color: Colors.grey),
-                                    border: InputBorder.none),
+                            TextField(
+                              controller: _emailController,
+                              decoration: const InputDecoration(
+                                hintText: "Email",
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: InputBorder.none,
                               ),
                             ),
-                            const SizedBox(
-                              height: 25.5,
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom:
-                                      BorderSide(color: Colors.grey[200]!),
-                                ),
-                              ),
-                              child: TextField(
-                                controller: _passwordController,
-                                obscureText: true,
-                                decoration: const InputDecoration(
-                                    hintText: "Password",
-                                    hintStyle: TextStyle(color: Colors.grey),
-                                    border: InputBorder.none),
+                            const SizedBox(height: 25.5),
+                            TextField(
+                              controller: _passwordController,
+                              obscureText: true,
+                              decoration: const InputDecoration(
+                                hintText: "Password",
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: InputBorder.none,
                               ),
                             ),
-                            const SizedBox(
-                              height: 25.5,
-                            ),
-                            Container(
-                              height: 50,
-                              width: 250,
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 50),
-                              decoration: BoxDecoration(
+                            const SizedBox(height: 25.5),
+                            InkWell(
+                              onTap: login,
+                              child: Container(
+                                height: 50,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(50),
-                                  color: Colors.orange[900]!),
-                              child: Center(
-                                child: TextButton(
-                                  onPressed: login,
-                                  child: const Text("Login",
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      )),
+                                  color: Colors.orange[900]!,
                                 ),
-                              ),
-                            ),
-                            const Padding(padding: const EdgeInsets.all(10)),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const TelaEsqueci(),
-                                    ),
-                                  );
-                                },
-                                
-                                child: const AnimatedDefaultTextStyle(
-                                  duration: Duration(milliseconds: 200),
-                                  style: TextStyle(
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
-                                  ),
+                                child: const Center(
                                   child: Text(
-                                    "Esqueci minha senha.",
-                                  ),
-                                  
-                                ),
-                            
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Text(
-                                  "Ainda não possui cadastro? "
-                                ),
-                                MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => const TelaCadastro(),
-                                      ),
-                                    );
-                                  },
-                                  child: const AnimatedDefaultTextStyle(
-                                    duration: Duration(milliseconds: 200),
+                                    "Login",
                                     style: TextStyle(
-                                      color: Colors.grey,
+                                      color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      decoration: TextDecoration.underline,
-                                    ),
-                                    child: Text(
-                                      "Clique aqui",
                                     ),
                                   ),
-
                                 ),
                               ),
-                              
-                              ]
+                            ),
+                            const SizedBox(height: 10),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const TelaEsqueci(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Esqueci minha senha.",
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
                             ),
                           ],
                         ),
