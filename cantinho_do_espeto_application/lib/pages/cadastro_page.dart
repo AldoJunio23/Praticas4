@@ -52,6 +52,8 @@ class TelaCadastroState extends State<TelaCadastro> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
+      
       body: Container(
         padding: const EdgeInsets.all(70),
         width: double.infinity,
