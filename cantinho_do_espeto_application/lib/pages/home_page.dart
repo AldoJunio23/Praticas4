@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/pages/cadastro_page.dart';
+import 'package:flutter_application_praticas/pages/esquecisenha_page.dart';
 import 'package:flutter_application_praticas/services/auth_service.dart';
 
 class HomePage extends StatefulWidget {
@@ -81,7 +83,7 @@ class HomePageState extends State<HomePage> {
                   ),
                   Center(
                     child: Text(
-                      "Login - 08.09.2024",
+                      "Login",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 40,
@@ -189,6 +191,74 @@ class HomePageState extends State<HomePage> {
                                       )),
                                 ),
                               ),
+                            ),
+                            const Padding(padding: const EdgeInsets.all(10)),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const TelaEsqueci(),
+                                    ),
+                                  );
+                                },
+                                
+                                child: const AnimatedDefaultTextStyle(
+                                  duration: Duration(milliseconds: 200),
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                    decoration: TextDecoration.underline,
+                                  ),
+                                  child: Text(
+                                    "Esqueci minha senha.",
+                                  ),
+                                  
+                                ),
+                            
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Text(
+                                  "Ainda não possui cadastro? "
+                                ),
+                                MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const TelaCadastro(),
+                                      ),
+                                    );
+                                  },
+                                  child: const AnimatedDefaultTextStyle(
+                                    duration: Duration(milliseconds: 200),
+                                    style: TextStyle(
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                    child: Text(
+                                      "Clique aqui",
+                                    ),
+                                  ),
+
+                                ),
+                              ),
+                              
+                              ]
                             ),
                           ],
                         ),

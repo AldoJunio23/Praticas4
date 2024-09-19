@@ -68,8 +68,7 @@ class TelaCadastroState extends State<TelaCadastro> {
         
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            // Título e subtítulo
+          children: <Widget>[            // Título e subtítulo
             IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () {
