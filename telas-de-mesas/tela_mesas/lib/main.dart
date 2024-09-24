@@ -3,233 +3,142 @@ import 'package:flutter/material.dart';
 void main() {
   runApp(
     const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: TelaMesas(),
-  ));
+      debugShowCheckedModeBanner: false,
+      home: TelaMesas(),
+    ),
+  );
 }
 
 class TelaMesas extends StatefulWidget {
-  
   const TelaMesas({super.key});
 
   @override
   TelaMesasState createState() => TelaMesasState();
-
 }
 
-class TelaMesasState extends State<TelaMesas>{
+class TelaMesasState extends State<TelaMesas> {
 
-  @override 
+   // Lista de estados das mesas, sse está ocupada ou desocupada
+  List<bool> mesaEstados = List.generate(18, (index) => false);
 
-  Widget build(BuildContext context){
-   
-    return Scaffold(  
+  @override
+  Widget build(BuildContext context) {
 
-     appBar : AppBar(
+    return Scaffold(
 
-      backgroundColor: Colors.grey,
-      title: const Text("Mesas"),
-  
+      appBar: AppBar(
 
-     ),
-
-     body: SingleChildScrollView(
-
-      padding: const EdgeInsets.all(30),
-
-       child: Wrap(
-
-          spacing: 25, // Espaço horizontal entre os botões
-
-          runSpacing: 25, // Espaço vertical entre as linhas de botões
-          
-          children: [
-
-            Row(
-
-              children: [
-
-          ElevatedButton(      
-
-            onPressed: () { // botão chama um função
-
-
-            },
-
-            style: ElevatedButton.styleFrom(
-
-              padding: EdgeInsets.all(25),
-
-
-              backgroundColor: const Color.fromARGB(255, 67, 158, 70),
-
-              shape: RoundedRectangleBorder(
-
-                borderRadius: BorderRadius.circular(7.0)
-
-              )
-
-            ),
-
-            child: const Text("01",
-              style: TextStyle(fontSize: 20,color: Colors.white),
-            ) 
-            
-            ),
-
-             const SizedBox(width: 25),
-
-
-              ElevatedButton(      
-
-            onPressed: () { // botão chama um função
-
-
-            },
-
-            style: ElevatedButton.styleFrom(
-
-              padding: EdgeInsets.all(25),
-              backgroundColor: const Color.fromARGB(255, 67, 158, 70),
-
-              shape: RoundedRectangleBorder(
-
-                borderRadius: BorderRadius.circular(7.0)
-
-              )
-
-            ),
-
-            child: const Text("02",
-              style: TextStyle(fontSize: 20,color: Colors.white),
-            ) 
-            
-            ),
-
-               const SizedBox(width: 25),
-
-              ElevatedButton(      
-
-            onPressed: () { // botão chama um função
-
-
-            },
-
-            style: ElevatedButton.styleFrom(
-
-              padding: EdgeInsets.all(25),
-              backgroundColor: const Color.fromARGB(255, 67, 158, 70),
-
-              shape: RoundedRectangleBorder(
-
-                borderRadius: BorderRadius.circular(7.0)
-
-              )
-
-            ),   
-            
-            child: const Text("03",
-              style: TextStyle(fontSize: 20,color: Colors.white),
-            ) 
-            
-            ),
-
-              const SizedBox(width: 25),
-
-                  ElevatedButton(      
-
-            onPressed: () { // botão chama um função
-
-
-            },
-
-            style: ElevatedButton.styleFrom(
-
-              padding: EdgeInsets.all(25),
-              backgroundColor: const Color.fromARGB(255, 67, 158, 70),
-
-              shape: RoundedRectangleBorder(
-
-                borderRadius: BorderRadius.circular(7.0)
-
-              )
-
-            ),   
-            
-            child: const Text("03",
-              style: TextStyle(fontSize: 15,color: Colors.white),
-            ) 
-            
-            ),
-
-              const SizedBox(width: 25),
-
-              ]
-            )
-        ],
+        backgroundColor: Colors.grey,
+        title: const Text("Mesas"),
 
       ),
+      
+      body: SingleChildScrollView(
 
-     ),
+        padding: const EdgeInsets.all(30),
+
+        child: Wrap(
+
+          spacing: 25, // Espaço horizontal entre os botões
+          runSpacing: 25, // Espaço vertical entre as linhas de botões
+
+          children: List.generate(18, (index) {
+
+            // Define a cor do botão com base no estado da mesa
+            Color buttonColor = mesaEstados[index] ? Colors.red : Colors.green;
+
+            return ElevatedButton(
+              onPressed: () {
+ 
+                // muda o  estado da mesa quando o botão é pressionado
+                setState(() {
+                  mesaEstados[index] = !mesaEstados[index];
+                });
+              },
+
+              style: ElevatedButton.styleFrom(
+
+                padding: const EdgeInsets.all(25), // Distância entre elementos
+
+                backgroundColor: buttonColor, // Usar a cor definida
+
+                shape: RoundedRectangleBorder(
+
+                  borderRadius: BorderRadius.circular(7.0),
+
+                ),
+              ),
+              child: Text(
+
+                (index + 1).toString().padLeft(2, '0'), // Exibe números 01, 02, etc.
+
+                style: const TextStyle(fontSize: 20, color: Colors.white),
+              ),
+            );
+          }),
+        ),
+      ),
 
       drawer: Drawer(
-
         backgroundColor: const Color.fromARGB(200, 158, 158, 158),
-        
-        child: Column( // coluna de componetes
+
+        child: Column(
 
           crossAxisAlignment: CrossAxisAlignment.start,
 
-          children: [ // "filho" conteúdo de dentro
+          children: const [
 
-              SizedBox(height: 20), // Adiciona um espaçamento
-        
+            SizedBox(height: 20), // Adiciona um espaçamento
 
-            ListTile(  // cria uma lista de titulos
+            ListTile(
 
               leading: Icon(Icons.home, color: Colors.white),
-              title: Text('ínicio'),
+
+              title: Text('Início'),
+
               textColor: Colors.white,
+
             ),
-
-
 
             ListTile(
 
               leading: Icon(Icons.book, color: Colors.white),
               title: Text('Histórico'),
-               textColor: Colors.white,
+              textColor: Colors.white,
 
             ),
 
-             ListTile(
+            ListTile(
 
               leading: Icon(Icons.restaurant, color: Colors.white),
               title: Text('Produtos'),
-                textColor: Colors.white,
-           
+              textColor: Colors.white,
+
             ),
 
-             ListTile(
+            ListTile(
 
               leading: Icon(Icons.restaurant_menu, color: Colors.white),
               title: Text('Cardápio'),
-                textColor: Colors.white,
-            
+              textColor: Colors.white,
+
             ),
 
-             ListTile(
+            ListTile(
 
               leading: Icon(Icons.exit_to_app, color: Colors.white),
               title: Text('Sair'),
-              textColor: Colors.white,        
+              textColor: Colors.white,
 
             ),
 
           ],
+
         ),
       ),
 
     );
+
   }
+
 }
