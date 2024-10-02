@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/pages/cozinha_page.dart';
+import 'package:flutter_application_praticas/pages/mesas_page.dart';
 
 void main() {
   runApp(const MaterialApp(
@@ -98,8 +100,12 @@ class TelaInicioState extends State<TelaInicio> {
             // botões
             ElevatedButton(
               onPressed: () {
-
-                print("Botão Mesa foi clicado");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TelaMesas(),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.symmetric(horizontal: 130, vertical:70),
@@ -139,6 +145,36 @@ class TelaInicioState extends State<TelaInicio> {
               child: const Text(
 
                 "Comanda",
+
+                style: TextStyle(fontSize: 30,color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 30), // Espaço entre os botões
+
+            ElevatedButton(
+
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CozinhaPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+
+                padding: const EdgeInsets.symmetric(horizontal: 100,vertical: 70),
+                shape: RoundedRectangleBorder(
+
+                  borderRadius:  BorderRadius.circular(7.0),
+
+                ),
+                backgroundColor: const Color.fromARGB(255, 245, 180, 0)
+
+              ),
+              child: const Text(
+
+                "Cozinha",
 
                 style: TextStyle(fontSize: 30,color: Colors.white),
               ),
