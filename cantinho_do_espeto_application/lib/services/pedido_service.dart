@@ -27,7 +27,7 @@ class PedidoService {
   // Busca todos os pedidos
   Future<List<Map<String, dynamic>>> buscarPedidos() async {
     try {
-      QuerySnapshot pedidosSnapshot = await _firestore.collection('pedidos').get();
+      QuerySnapshot pedidosSnapshot = await _firestore.collection('Pedidos').get();
       List<Map<String, dynamic>> pedidos = [];
 
       for (QueryDocumentSnapshot pedidoDoc in pedidosSnapshot.docs) {

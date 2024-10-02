@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/pages/comandas_page.dart';
 import 'package:flutter_application_praticas/pages/cozinha_page.dart';
 import 'package:flutter_application_praticas/pages/mesas_page.dart';
 
@@ -88,14 +89,9 @@ class TelaInicioState extends State<TelaInicio> {
         
       ),
 
-      body: SingleChildScrollView(
-
-        padding: const EdgeInsets.all(50),
-
+      body: Center(
         child: Column(
-
-          crossAxisAlignment: CrossAxisAlignment.center, // Alinha os widgets horizontalmente
-           
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // botões
             ElevatedButton(
@@ -108,7 +104,7 @@ class TelaInicioState extends State<TelaInicio> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 130, vertical:70),
+                padding: const EdgeInsets.symmetric(horizontal: 129, vertical:70),
                 shape: RoundedRectangleBorder(
 
                   borderRadius: BorderRadius.circular(7.0)
@@ -128,8 +124,12 @@ class TelaInicioState extends State<TelaInicio> {
             ElevatedButton(
 
               onPressed: () {
-
-                print("Botão Comanda foi clicado");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const TelaComandas(),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
 
@@ -163,7 +163,7 @@ class TelaInicioState extends State<TelaInicio> {
               },
               style: ElevatedButton.styleFrom(
 
-                padding: const EdgeInsets.symmetric(horizontal: 100,vertical: 70),
+                padding: const EdgeInsets.symmetric(horizontal: 110,vertical: 70),
                 shape: RoundedRectangleBorder(
 
                   borderRadius:  BorderRadius.circular(7.0),
