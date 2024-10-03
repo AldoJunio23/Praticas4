@@ -1,5 +1,7 @@
-// Card Componente - 03/10/2024
+/*
 
+
+// Card Componente - Produto_Component - 03/10/2024
 // teste:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import necessário para FilteringTextInputFormatter
@@ -193,3 +195,6 @@ class _OptionsState extends State<Options> {
     );
   }
 }
+
+
+*/
