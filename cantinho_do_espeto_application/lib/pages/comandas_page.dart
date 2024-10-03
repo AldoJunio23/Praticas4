@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/pages/criar_pedidos_page.dart';
 
 
 class TelaComandas extends StatefulWidget {
@@ -41,7 +42,10 @@ class _TelaComandasState extends State<TelaComandas>
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              adicionarComanda();
+               Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CriarPedidosPage()),
+            );
             },
           ),
         ],
@@ -61,7 +65,12 @@ class _TelaComandasState extends State<TelaComandas>
 
             ElevatedButton(
 
-              onPressed: adicionarComanda,
+              onPressed: (){
+                  Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CriarPedidosPage()),
+                  );
+              },
 
               style: ElevatedButton.styleFrom(
 
