@@ -51,7 +51,6 @@ class TelaBebida extends StatelessWidget {
               leading: const Icon(Icons.home), // home
               title: const Text('Início - Cardápio'), // Início Cardápio
               onTap: () {
-                // navega para a tela de entrada
                 //Navigator.pop(context);
 
                 // navega para a tela inicial de cardápio
@@ -63,7 +62,6 @@ class TelaBebida extends StatelessWidget {
               leading: const Icon(Icons.restaurant_menu), // home
               title: const Text('Entrada'), // Início
               onTap: () {
-                // navega para a tela de entrada
                 //Navigator.pushNamed(context, 'entrada');
 
                 // navega para a tela de entrada
@@ -74,7 +72,6 @@ class TelaBebida extends StatelessWidget {
               leading: const Icon(Icons.dinner_dining),
               title: const Text('Prato Principal'),
               onTap: () {
-                // navega para a tela de prato principal
                 //Navigator.pushNamed(context, 'prato principal');
 
                 // navega para a tela de prato principal
@@ -85,7 +82,6 @@ class TelaBebida extends StatelessWidget {
               leading: const Icon(Icons.cake),
               title: const Text('Sobremesa'),
               onTap: () {
-                // navega para a tela de sobremesa
                 //Navigator.pushNamed(context, 'sobremesa');
 
                 // navega para a tela de sobremesa
@@ -96,7 +92,6 @@ class TelaBebida extends StatelessWidget {
               leading: const Icon(Icons.wine_bar),
               title: const Text('Bebida'),
               onTap: () {
-                // navega para a tela de bebida
                 //Navigator.pushNamed(context, 'bebida');
 
                 // navega para a tela de bebida
