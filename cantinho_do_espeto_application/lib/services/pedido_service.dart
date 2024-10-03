@@ -5,16 +5,15 @@ class PedidoService {
 
   // Cria um novo pedido
   Future<void> criarPedido({
-    required List<DocumentReference> listaProdutos,
+    required List<DocumentReference<Object?>> listaProdutos,
     required DocumentReference mesa,
     required double valorTotal,
   }) async {
     try {
-      // Cria um novo documento na coleção 'pedidos'
-      await _firestore.collection('pedidos').add({
+      await _firestore.collection('Pedidos').add({
         'finalizado': false,
-        'horario': FieldValue.serverTimestamp(), // Define o horário como timestamp do servidor
-        'listaProdutos': listaProdutos,
+        'horario': FieldValue.serverTimestamp(),
+        'listaProdutos': listaProdutos, // Aqui estamos passando a lista correta de DocumentReference
         'mesa': mesa,
         'valorTotal': valorTotal,
       });
@@ -32,10 +31,22 @@ class PedidoService {
 
       for (QueryDocumentSnapshot pedidoDoc in pedidosSnapshot.docs) {
         Map<String, dynamic> pedidoData = pedidoDoc.data() as Map<String, dynamic>;
+        // Conversão manual de lista dinâmica para lista de DocumentReference<Object?>
+        List<DocumentReference<Object?>> listaProdutos = [];
+        if (pedidoData['listaProdutos'] is List) {
+          listaProdutos = (pedidoData['listaProdutos'] as List)
+              .where((produto) => produto is DocumentReference<Object?>)
+              .map((produto) => produto as DocumentReference<Object?>)
+              .toList();
+        }
 
         pedidos.add({
           'id': pedidoDoc.id,
-          ...pedidoData,
+          'mesa': pedidoData['mesa'], // Certifique-se de que mesa está sendo recuperado corretamente
+          'listaProdutos': listaProdutos, // Passa a lista corrigida
+          'horario': pedidoData['horario'],
+          'valorTotal': pedidoData['valorTotal'],
+          'finalizado': pedidoData['finalizado'],
         });
       }
 
@@ -49,7 +60,7 @@ class PedidoService {
   // Finaliza um pedido
   Future<void> finalizarPedido(String pedidoId) async {
     try {
-      await _firestore.collection('pedidos').doc(pedidoId).update({
+      await _firestore.collection('Pedidos').doc(pedidoId).update({
         'finalizado': true,
       });
       print('Pedido finalizado com sucesso!');
