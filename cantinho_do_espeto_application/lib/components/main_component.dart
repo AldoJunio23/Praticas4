@@ -1,3 +1,6 @@
+// Card Componente - 03/10/2024
+
+// teste:
 import 'package:flutter/material.dart';
 import 'produto_component.dart';  // Importando o arquivo ProdutoCard.dart
 
