@@ -1,6 +1,6 @@
 // Card Componente - 03/10/2024
 
-/* teste:
+// teste:
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import necessário para FilteringTextInputFormatter
 
@@ -135,31 +135,6 @@ class _ProdutoCardState extends State<ProdutoCard> {
                   onPressed: _validarCampos,
                   child: Text(widget.titulo),
                 ),
-                const SizedBox(width: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 20.0,
-                      horizontal: 40.0,
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text(
-                    "Cancelar",
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ),
               ],
             ),
           ],
@@ -218,4 +193,3 @@ class _OptionsState extends State<Options> {
     );
   }
 }
-*/
