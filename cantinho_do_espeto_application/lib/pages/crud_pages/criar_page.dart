@@ -249,6 +249,7 @@ class _CriarProdutoState extends State<CriarProduto> {
   }
 }
 
+
 class Options extends StatefulWidget {
   final ValueChanged<String?> onCategoriaSelecionada;
 
@@ -258,6 +259,7 @@ class Options extends StatefulWidget {
   @override
   _OptionsState createState() => _OptionsState();
 }
+
 
 class _OptionsState extends State<Options> {
   String? _selecionarOpcoes;
