@@ -74,7 +74,7 @@ class TelaSobremesa extends StatelessWidget {
               leading: const Icon(Icons.dinner_dining),
               title: const Text('Prato Principal'),
               onTap: () {
-                // navega para a tela de prato principal
+                // navega para a tela de prato p
                 //Navigator.pushNamed(context, 'prato principal');
 
                 // navega para a tela de prato principal
