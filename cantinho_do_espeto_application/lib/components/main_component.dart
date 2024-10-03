@@ -129,3 +129,6 @@ void main() {
 }
 
 
+// Comandos github:
+// cd cantinho_do_espeto_application
+// flutter run
