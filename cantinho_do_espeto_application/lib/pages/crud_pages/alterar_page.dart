@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Import necessário para FilteringTextInputFormatter
 
@@ -13,7 +14,27 @@ class _AlterarProdutoState extends State<AlterarProduto> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _precoController = TextEditingController();
   String? _categoriaSelecionada; // Para o Dropdown de categorias
+  List<String> _subprodutos = [];
 
+  @override
+  void initState() {
+    super.initState();
+    _carregarSubprodutos(); // Carrega subprodutos ao iniciar
+  }
+
+  Future<void> _carregarSubprodutos() async {
+    try {
+      final QuerySnapshot result = await FirebaseFirestore.instance
+          .collection('Produto') // Nome da coleção
+          .get();
+      setState(() {
+        _subprodutos = result.docs.map((doc) => doc['categoria'] as String).toList(); // 'categoria' é o campo que contém o subproduto
+      });
+    } catch (e) {
+      // Tratamento de erro, caso algo dê errado
+      print('Erro ao carregar subprodutos: $e');
+    }
+  }
   // Função de validação dos campos
   void _validarCampos() {
     String nomeProduto = _nomeController.text.trim();
@@ -158,10 +179,20 @@ class _AlterarProdutoState extends State<AlterarProduto> {
                     ),
                     const SizedBox(height: 25),
                     // Dropdown de Categoria
-                    Options(
-                      onCategoriaSelecionada: (String? categoria) {
+                    DropdownButton<String>(
+                      hint: const Text("Selecione a Categoria"),
+                      value: _categoriaSelecionada,
+                      icon: const Icon(Icons.keyboard_arrow_down),
+                      isExpanded: true,
+                      items: _subprodutos.map((String subproduto) {
+                        return DropdownMenuItem(
+                          value: subproduto,
+                          child: Text(subproduto),
+                        );
+                      }).toList(),
+                      onChanged: (String? novoValor) {
                         setState(() {
-                          _categoriaSelecionada = categoria;
+                          _categoriaSelecionada = novoValor;
                         });
                       },
                     ),

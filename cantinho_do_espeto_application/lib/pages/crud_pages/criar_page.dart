@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import necessário para FilteringTextInputFormatter
+import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Importação do Firestore
 
 class CriarProduto extends StatefulWidget {
   const CriarProduto({super.key});
@@ -9,12 +10,32 @@ class CriarProduto extends StatefulWidget {
 }
 
 class _CriarProdutoState extends State<CriarProduto> {
-  // Controladores para os campos de texto
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _precoController = TextEditingController();
-  String? _categoriaSelecionada; // Para o Dropdown de categorias
+  String? _categoriaSelecionada;
+  List<String> _subprodutos = []; // Lista para armazenar subprodutos
 
-  // Função de validação dos campos
+  @override
+  void initState() {
+    super.initState();
+    _carregarSubprodutos(); // Carrega subprodutos ao iniciar
+  }
+
+  // Função para carregar subprodutos do Firestore
+  Future<void> _carregarSubprodutos() async {
+    try {
+      final QuerySnapshot result = await FirebaseFirestore.instance
+          .collection('Produto') // Nome da coleção
+          .get();
+      setState(() {
+        _subprodutos = result.docs.map((doc) => doc['categoria'] as String).toList(); // 'categoria' é o campo que contém o subproduto
+      });
+    } catch (e) {
+      // Tratamento de erro, caso algo dê errado
+      print('Erro ao carregar subprodutos: $e');
+    }
+  }
+
   void _validarCampos() {
     String nomeProduto = _nomeController.text.trim();
     String precoProduto = _precoController.text.trim();
@@ -22,7 +43,6 @@ class _CriarProdutoState extends State<CriarProduto> {
     if (nomeProduto.isEmpty ||
         precoProduto.isEmpty ||
         _categoriaSelecionada == null) {
-      // Exibe um alerta informando que os campos estão vazios
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Preencha os campos antes de continuar!'),
@@ -30,7 +50,6 @@ class _CriarProdutoState extends State<CriarProduto> {
         ),
       );
     } else if (!_precoValido(precoProduto)) {
-      // Se o preço contiver caracteres inválidos, exibe um alerta
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Preço inválido! Por favor, insira apenas números.'),
@@ -38,7 +57,6 @@ class _CriarProdutoState extends State<CriarProduto> {
         ),
       );
     } else {
-      // Se todos os campos estiverem preenchidos corretamente, exibe uma mensagem de sucesso
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Produto criado com sucesso!'),
@@ -49,9 +67,7 @@ class _CriarProdutoState extends State<CriarProduto> {
     }
   }
 
-  // Função para validar se o preço contém apenas números
   bool _precoValido(String preco) {
-    // Verifica se o preço contém apenas números
     final RegExp regExp = RegExp(r'^[0-9]+$');
     return regExp.hasMatch(preco);
   }
@@ -101,34 +117,7 @@ class _CriarProdutoState extends State<CriarProduto> {
                 ],
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('Início'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('#'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('##'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.home),
-              title: const Text('###'),
-              onTap: () {
-                Navigator.pop(context);
-              },
-            ),
+            // Adicione suas opções de menu aqui
           ],
         ),
       ),
@@ -158,10 +147,20 @@ class _CriarProdutoState extends State<CriarProduto> {
                     ),
                     const SizedBox(height: 25),
                     // Dropdown de Categoria
-                    Options(
-                      onCategoriaSelecionada: (String? categoria) {
+                    DropdownButton<String>(
+                      hint: const Text("Selecione a Categoria"),
+                      value: _categoriaSelecionada,
+                      icon: const Icon(Icons.keyboard_arrow_down),
+                      isExpanded: true,
+                      items: _subprodutos.map((String subproduto) {
+                        return DropdownMenuItem(
+                          value: subproduto,
+                          child: Text(subproduto),
+                        );
+                      }).toList(),
+                      onChanged: (String? novoValor) {
                         setState(() {
-                          _categoriaSelecionada = categoria;
+                          _categoriaSelecionada = novoValor;
                         });
                       },
                     ),
@@ -178,6 +177,9 @@ class _CriarProdutoState extends State<CriarProduto> {
                         FilteringTextInputFormatter.digitsOnly,
                       ],
                     ),
+                    const SizedBox(height: 25),
+                    // Dropdown de Subprodutos
+                    
                   ],
                 ),
               ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/pages/home_page.dart';
 import 'package:flutter_application_praticas/pages/inicio_page.dart';
-import 'pages/home_page.dart';
 import 'options/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -18,6 +18,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Application PraticasIV',
       home: TelaInicio(),
     );

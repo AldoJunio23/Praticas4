@@ -1,18 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/pages/admin_page.dart';
 import 'package:flutter_application_praticas/pages/comandas_page.dart';
 import 'package:flutter_application_praticas/pages/cozinha_page.dart';
+import 'package:flutter_application_praticas/pages/crud_pages/deletar_page.dart';
 import 'package:flutter_application_praticas/pages/mesas_page.dart';
-
-void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: TelaInicio(),
-  ));
-}
 
 class TelaInicio extends StatefulWidget {
   const TelaInicio({super.key});
-
+  
   @override
   TelaInicioState createState() => TelaInicioState();
 }
@@ -23,60 +18,80 @@ class TelaInicioState extends State<TelaInicio> {
 
     return Scaffold(
     // tela lateral que exibe as opções
-      drawer: const Drawer(
-
-        backgroundColor: Color.fromARGB(200, 158, 158, 158),
-        
-        child: Column( // coluna de componetes
-
-          crossAxisAlignment: CrossAxisAlignment.start,
-
-          children: [ // "filho" conteúdo de dentro
-
-              SizedBox(height: 20), // Adiciona um espaçamento
-        
-
-            ListTile(  // cria uma lista de titulos
-
-              leading: Icon(Icons.home, color: Colors.white),
-              title: Text('ínicio'),
-              textColor: Colors.white,
+      drawer: Drawer(
+        child: ListView(
+          
+          children: <Widget>[
+            Container(
+              padding: const EdgeInsets.fromLTRB(15, 5, 5, 5),
+              color: Colors.orange,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Menu",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white, fontSize: 24),
+                  ),
+                  Builder(
+                    builder: (context) {
+                      return IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
+                ],
             ),
-
-
-
-            ListTile(
-
-              leading: Icon(Icons.book, color: Colors.white),
-              title: Text('Histórico'),
-               textColor: Colors.white,
-
             ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+               Column(
+                children: [
+                  ListTile(
+                  leading: const Icon(Icons.book), // home
+                  title: const Text('Histórico'), // Início
+                  onTap: () {
 
-             ListTile(
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.restaurant_menu),
+                  title: const Text('Cardápio'),
+                  onTap: () {
 
-              leading: Icon(Icons.restaurant, color: Colors.white),
-              title: Text('Produtos'),
-                textColor: Colors.white,
-           
-            ),
-
-             ListTile(
-
-              leading: Icon(Icons.restaurant_menu, color: Colors.white),
-              title: Text('Cardápio'),
-                textColor: Colors.white,
-            
-            ),
-
-             ListTile(
-
-              leading: Icon(Icons.exit_to_app, color: Colors.white),
-              title: Text('Sair'),
-              textColor: Colors.white,        
-
-            ),
-
+                  },
+                ),],
+              ),
+              const Padding(padding: EdgeInsets.symmetric(vertical: 270)),
+              Column(
+                children: [
+                  ListTile(
+                  leading: const Icon(Icons.lock_person),
+                  title: const Text('Admin'),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DeletarProduto(),
+                      ),
+                    );
+                  },
+                ), // espaço entre os demais itens da lista
+                ListTile(
+                  leading: const Icon(Icons.exit_to_app),
+                  title: const Text('Sair'),
+                  onTap: () {
+                    // ação
+                  },
+                ),],
+              ) 
+            ],  
+            )
           ],
         ),
       ),
@@ -110,7 +125,7 @@ class TelaInicioState extends State<TelaInicio> {
                   borderRadius: BorderRadius.circular(7.0)
                 ),
 
-                backgroundColor: const Color.fromARGB(255, 212, 133, 14)
+                backgroundColor: const Color.fromARGB(255, 245, 180, 0)
               ),
 
               child: const Text( "Mesa", 
