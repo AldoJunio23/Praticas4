@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:314403589372:android:f87453c3d76d2a64db1b79",
         "android_client_info": {
-          "package_name": "com.cantinhodoespeto.app"
+          "package_name": "com.example.flutter_application_praticas"
         }
       },
       "oauth_client": [],

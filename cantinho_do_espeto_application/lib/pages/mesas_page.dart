@@ -14,115 +14,210 @@ class TelaMesasState extends State<TelaMesas> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey,
-        title: const Text("Mesas"),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(30),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: _firestore.collection('Mesas').snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              return const Center(child: Text('Erro ao carregar mesas.'));
-            }
-
-            final mesas = snapshot.data?.docs ?? [];
-
-            return Wrap(
-              spacing: 25, // Espaço horizontal entre os botões
-              runSpacing: 25, // Espaço vertical entre as linhas de botões
-              children: List.generate(mesas.length, (index) {
-                var mesa = mesas[index];
-                var isOcupada = mesa['status'] ?? false; // Usar o campo 'status' para determinar a ocupação
-
-                Color buttonColor = isOcupada ? Colors.red : Colors.green;
-
-                return ElevatedButton(
-                  onPressed: () {
-                    // Altera o estado da mesa no Firestore
-                    _firestore.collection('Mesas').doc(mesa.id).update({
-                      'status': !isOcupada,
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(25),
-                    backgroundColor: buttonColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(7.0),
-                    ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            Container(
+              padding: const EdgeInsets.fromLTRB(15, 5, 5, 5),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.orange[900]!.withOpacity(0.8),
+                    Colors.orange[700]!.withOpacity(0.8),
+                    Colors.orange[500]!.withOpacity(0.8),
+                  ],
+                  stops: const [0.0, 0.3, 1.0],
+                ),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Menu",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.white, fontSize: 24),
                   ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Mesa ${mesa['numMesa']}', // Exibir o número da mesa
-                        style: const TextStyle(fontSize: 20, color: Colors.white),
-                      ),
-                      const SizedBox(height: 5),
-                      FutureBuilder<List<String>>(
-                        future: _carregarPedidos(mesa['listaPedidos']),
-                        builder: (context, pedidosSnapshot) {
-                          if (pedidosSnapshot.connectionState == ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          } else if (pedidosSnapshot.hasError) {
-                            return const Text('Erro ao carregar pedidos');
-                          } else if (!pedidosSnapshot.hasData || pedidosSnapshot.data!.isEmpty) {
-                            return const Text('Nenhum pedido');
-                          }
-
-                          final pedidos = pedidosSnapshot.data!;
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: pedidos.map((pedido) => Text(pedido)).toList(),
-                          );
+                  Builder(
+                    builder: (context) {
+                      return IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () {
+                          Navigator.pop(context);
                         },
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                );
-              }),
-            );
-          },
-        ),
-      ),
-      drawer: const Drawer(
-        backgroundColor: Color.fromARGB(200, 158, 158, 158),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 20), // Adiciona um espaçamento
-            ListTile(
-              leading: Icon(Icons.home, color: Colors.white),
-              title: Text('Início'),
-              textColor: Colors.white,
+                ],
             ),
-            ListTile(
-              leading: Icon(Icons.book, color: Colors.white),
-              title: Text('Histórico'),
-              textColor: Colors.white,
             ),
-            ListTile(
-              leading: Icon(Icons.restaurant, color: Colors.white),
-              title: Text('Produtos'),
-              textColor: Colors.white,
-            ),
-            ListTile(
-              leading: Icon(Icons.restaurant_menu, color: Colors.white),
-              title: Text('Cardápio'),
-              textColor: Colors.white,
-            ),
-            ListTile(
-              leading: Icon(Icons.exit_to_app, color: Colors.white),
-              title: Text('Sair'),
-              textColor: Colors.white,
-            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+               Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.home), // home
+                    title: const Text('Início'), // Início
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.pop(context);
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.book), // home
+                    title: const Text('Histórico'), // Início
+                    onTap: () {
+
+                    },
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.restaurant_menu),
+                    title: const Text('Cardápio'),
+                    onTap: () {
+
+                    },
+                  ),
+                ],
+              ),
+              const Padding(padding: EdgeInsets.symmetric(vertical: 270)),
+              Column(
+                children: [ // espaço entre os demais itens da lista
+                ListTile(
+                  leading: const Icon(Icons.exit_to_app),
+                  title: const Text('Sair'),
+                  onTap: () {
+                    // ação
+                  },
+                ),],
+              ) 
+            ],  
+            )
           ],
         ),
       ),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: AppBar(
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.orange[900]!.withOpacity(1),
+                  Colors.orange[900]!.withOpacity(0.9),
+                ],
+                stops: const [0.6, 1],
+              ),
+              border: const Border(
+                bottom: BorderSide(
+                  color: Colors.white,
+                  width: 1
+                )
+              )
+            ),
+          ),
+          title: const Text('Mesas', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white,),
+                onPressed: () { Scaffold.of(context).openDrawer(); },
+                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              );
+            },
+          ),
+        ),
+      ),
+      body: Container(
+        padding: const EdgeInsets.symmetric(vertical: 2),
+        height: double.infinity,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            colors: [
+              Colors.orange[900]!,
+              Colors.orange[800]!,
+              Colors.orange[400]!,
+            ],
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(30),
+          child: StreamBuilder<QuerySnapshot>(
+            stream: _firestore.collection('Mesas').snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return const Center(child: Text('Erro ao carregar mesas.'));
+              }
+
+              final mesas = snapshot.data?.docs ?? [];
+
+              return Wrap(
+                spacing: 25, // Espaço horizontal entre os botões
+                runSpacing: 25, // Espaço vertical entre as linhas de botões
+                children: List.generate(mesas.length, (index) {
+                  var mesa = mesas[index];
+                  var isOcupada = mesa['status'] ?? false; // Usar o campo 'status' para determinar a ocupação
+
+                  Color buttonColor = isOcupada ? Colors.red : Colors.green;
+
+                  return ElevatedButton(
+                    onPressed: () {
+                      // Altera o estado da mesa no Firestore
+                      _firestore.collection('Mesas').doc(mesa.id).update({
+                        'status': !isOcupada,
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.all(25),
+                      backgroundColor: buttonColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(7.0),
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Mesa ${mesa['numMesa']}', // Exibir o número da mesa
+                          style: const TextStyle(fontSize: 20, color: Colors.white),
+                        ),
+                        const SizedBox(height: 5),
+                        FutureBuilder<List<String>>(
+                          future: _carregarPedidos(mesa['listaPedidos']),
+                          builder: (context, pedidosSnapshot) {
+                            if (pedidosSnapshot.connectionState == ConnectionState.waiting) {
+                              return const CircularProgressIndicator();
+                            } else if (pedidosSnapshot.hasError) {
+                              return const Text('Erro ao carregar pedidos');
+                            } else if (!pedidosSnapshot.hasData || pedidosSnapshot.data!.isEmpty) {
+                              return const Text('Nenhum pedido');
+                            }
+
+                            final pedidos = pedidosSnapshot.data!;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: pedidos.map((pedido) => Text(pedido)).toList(),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+              );
+            },
+          ),
+        ),
+      )
     );
   }
 

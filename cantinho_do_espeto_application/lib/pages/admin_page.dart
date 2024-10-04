@@ -71,12 +71,6 @@ class AdminPageState extends State<AdminPage> {
                       const SizedBox(height: 16),
                       ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const AlterarProduto(),
-                            ),
-                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange[900], // Cor do botão

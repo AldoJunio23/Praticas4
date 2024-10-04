@@ -2,8 +2,30 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_praticas/services/pedido_service.dart';
 
-class CozinhaPage extends StatelessWidget {
+class CozinhaPage extends StatefulWidget {
   const CozinhaPage({super.key});
+
+  @override
+  _CozinhaPage createState() => _CozinhaPage();
+}
+
+class _CozinhaPage extends State<CozinhaPage> {
+
+  Future<void> _finalizarPedido(String pedidoId, BuildContext context) async {
+    try {
+      await PedidoService().finalizarPedido(pedidoId);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Pedido finalizado com sucesso!')),
+      );
+
+      setState((){});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao finalizar pedido: $e')),
+      );
+    }
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -14,130 +36,210 @@ class CozinhaPage extends StatelessWidget {
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
+                begin: Alignment.centerLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Colors.orange[900]!.withOpacity(0.8),
-                  Colors.orange[700]!.withOpacity(0.8),
-                  Colors.orange[500]!.withOpacity(0.8),
+                  Colors.orange[900]!.withOpacity(1),
+                  Colors.orange[900]!.withOpacity(0.9),
                 ],
-                stops: const [0.0, 0.5, 1.0],
+                stops: const [0.6, 1],
               ),
+              border: const Border(
+                bottom: BorderSide(
+                  color: Colors.white,
+                  width: 1
+                )
+              )
             ),
           ),
-          title: const Text('Comandas'),
-          leading: const Icon(Icons.menu),
+          title: const Text('Cozinha', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
         ),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
-        future: PedidoService().buscarPedidos(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Erro: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Nenhum pedido encontrado.'));
-          }
+      body: Container(
+        padding: const EdgeInsets.symmetric(vertical:2),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            colors: [
+              Colors.orange[900]!,
+              Colors.orange[800]!,
+              Colors.orange[400]!,
+            ],
+          ),
+        ),
+        child: FutureBuilder<List<Map<String, dynamic>>>(
+          future: PedidoService().buscarPedidos(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Erro: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('Nenhum pedido encontrado.'));
+            }
 
-          final pedidos = snapshot.data!;
+            final pedidos = snapshot.data!;
 
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: ListView.builder(
-              itemCount: pedidos.length,
-              itemBuilder: (context, index) {
-                final pedido = pedidos[index];
+            return Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ListView.builder(
+                itemCount: pedidos.length,
+                itemBuilder: (context, index) {
+                  final pedido = pedidos[index];
 
-                return FutureBuilder<String>(
-                  future: _carregarNomeMesa(pedido['mesa']),
-                  builder: (context, mesaSnapshot) {
-                    if (mesaSnapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (mesaSnapshot.hasError) {
-                      return Text('Erro ao carregar mesa');
-                    } else if (!mesaSnapshot.hasData) {
-                      return const Text('Mesa desconhecida');
-                    }
+                  return FutureBuilder<String>(
+                    future: _carregarNomeMesa(pedido['mesa']),
+                    builder: (context, mesaSnapshot) {
+                      if (mesaSnapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (mesaSnapshot.hasError) {
+                        return Text('Erro ao carregar mesa');
+                      } else if (!mesaSnapshot.hasData) {
+                        return const Text('Mesa desconhecida');
+                      }
 
-                    final nomeMesa = mesaSnapshot.data ?? 'Mesa não encontrada';
+                      final nomeMesa = mesaSnapshot.data ?? 'Mesa não encontrada';
 
-                    return Container(
-                      margin: const EdgeInsets.only(bottom: 16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Mesa: $nomeMesa",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 10),
-                          const Text("Produtos:"),
-                          FutureBuilder<List<String>>(
-                            future: _carregarProdutos(pedido['listaProdutos']),
-                            builder: (context, produtosSnapshot) {
-                              if (produtosSnapshot.connectionState == ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (produtosSnapshot.hasError) {
-                                return const Text('Erro ao carregar produtos');
-                              } else if (!produtosSnapshot.hasData || produtosSnapshot.data!.isEmpty) {
-                                return const Text('Nenhum produto encontrado.');
-                              }
-
-                              final produtos = produtosSnapshot.data!;
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: produtos.map((produto) => Text(produto)).toList(),
-                              );
-                            },
-                          ),
-                          // Exibir o botão "Finalizar" se o pedido não estiver finalizado
-                          if (!pedido['finalizado']) 
-                            ElevatedButton(
-                              onPressed: () => _finalizarPedido(pedido['id'], context),
-                              child: const Text('Finalizar Pedido'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red, // Cor do botão
+                      if(!pedido['finalizado']){
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12.0),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
                               ),
-                            ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          );
-        },
-      ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Mesa: $nomeMesa",
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 10),
+                              const Text("Produtos:"),
+                              FutureBuilder<List<Map<String, dynamic>>>(
+                                future: _carregarProdutos(pedido['listaProdutos']),
+                                builder: (context, produtosSnapshot) {
+                                  if (produtosSnapshot.connectionState == ConnectionState.waiting) {
+                                    return const CircularProgressIndicator();
+                                  } else if (produtosSnapshot.hasError) {
+                                    return const Text('Erro ao carregar produtos');
+                                  } else if (!produtosSnapshot.hasData || produtosSnapshot.data!.isEmpty) {
+                                    return const Text('Nenhum produto encontrado.');
+                                  }
+
+                                  final produtos = produtosSnapshot.data!;
+                                  return
+                                  SizedBox(
+                                    width: 500,
+                                    height: 270,
+                                    child:  ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: produtos.length,
+                                      itemBuilder: (context, index)
+                                      {
+                                        final produto = produtos[index];
+                                        final nome = produto['nome'].toString();
+                                        final imagem = produto['imagem'].toString();
+                                        final qtd = produto['qtd'].toString();
+                                          
+                                        return Container(
+                                          margin: const EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                            borderRadius: const BorderRadius.all(Radius.circular(5)),
+                                            color: Colors.white,
+                                            boxShadow: List.filled(produtos.length, const BoxShadow(
+                                              color: Colors.grey,
+                                              blurRadius: 2,
+                                              blurStyle: BlurStyle.normal
+                                            ), growable: true)
+                                          ),
+                                          width: 170,
+                                          height: 200,
+                                          child: Column(
+                                            children: [
+                                              const SizedBox(height: 10),
+                                              ClipRRect(
+                                                borderRadius: BorderRadius.circular(5.0), // Define o quão arredondada será a borda
+                                                child: SizedBox(
+                                                  width: 150, // Largura da imagem
+                                                  height: 150, // Altura da imagem
+                                                  child: Image.network(
+                                                    produto['imagem']!,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context, error, stackTrace) {
+                                                      return const Icon(Icons.error, size: 150, color: Colors.red);
+                                                    },
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(height: 10), // Espaço entre a imagem e o texto
+                                              Text(
+                                                nome.toUpperCase(), // Nome do produto
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold
+                                                ), // Estilização do texto
+                                              ),
+                                              const SizedBox(height: 10), // Espaço entre a imagem e o texto
+                                              Container(
+                                                alignment: Alignment.center,
+                                                decoration: const BoxDecoration(
+                                                  color: Colors.amber,
+                                                  borderRadius: BorderRadius.all(Radius.circular(50))
+                                                ) ,
+                                                width: 50,
+                                                height: 50,
+                                                child: Text(
+                                                  "x$qtd", // Nome do produto
+                                                  style: const TextStyle(
+                                                    fontSize: 24,
+                                                    fontWeight: FontWeight.bold
+                                                  ), // Estilização do texto
+                                                ),
+                                              )
+                                            ],
+                                          )
+                                        );
+                                      }
+                                    )
+                                  );
+                                },
+                              ),
+                              // Exibir o botão "Finalizar" se o pedido não estiver finalizado
+                              if (!pedido['finalizado']) 
+                                ElevatedButton(
+                                  onPressed: () => _finalizarPedido(pedido['id'], context),
+                                  child: const Text('Finalizar Pedido'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red, // Cor do botão
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      }
+                      return Container();
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      )
     );
   }
 
 // Função para finalizar o pedido
-  Future<void> _finalizarPedido(String pedidoId, BuildContext context) async {
-    try {
-      await PedidoService().finalizarPedido(pedidoId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Pedido finalizado com sucesso!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao finalizar pedido: $e')),
-      );
-    }
-  }
   
 
   Future<String> _carregarNomeMesa(DocumentReference mesaRef) async {
@@ -150,23 +252,39 @@ class CozinhaPage extends StatelessWidget {
     }
   }
 
-  Future<List<String>> _carregarProdutos(List<DocumentReference<Object?>> produtosRefs) async {
-    List<String> produtos = [];
+  Future<List<Map<String, dynamic>>> _carregarProdutos(List<DocumentReference<Object?>> produtosRefs) async {
+    List<Map<String, dynamic>> produtos = [];
 
     for (var ref in produtosRefs) {
       try {
         DocumentSnapshot produtoDoc = await ref.get();
         if (produtoDoc.exists) {
           Map<String, dynamic>? produtoData = produtoDoc.data() as Map<String, dynamic>?;
-          produtos.add(produtoData?['nome'] ?? 'Produto desconhecido');
+          String nome = produtoData?['nome'] ?? 'Produto desconhecido';
+          String imagemUrl = produtoData?['imagem'] ?? '';
+          int qtd = 1;
+          bool jaadicionou = false;
+          for(var pd in produtos)
+          {
+            if(nome == pd['nome'])
+            {
+              pd['qtd'] += 1;
+              jaadicionou = true;
+            }
+          }
+          if(!jaadicionou)
+          {
+            produtos.add({'nome': nome, 'imagem': imagemUrl, 'qtd': qtd});
+          }
         } else {
-          produtos.add('Produto não encontrado');
+          produtos.add({'nome': 'Produto não encontrado', 'imagem': ''});
         }
       } catch (e) {
-        produtos.add('Erro ao carregar produto');
+        produtos.add({'nome': 'Erro ao carregar produto', 'imagem': ''});
       }
     }
 
     return produtos;
   }
 }
+

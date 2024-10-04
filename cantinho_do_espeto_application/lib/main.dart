@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/pages/cozinha_page.dart';
+import 'package:flutter_application_praticas/pages/crud_pages/deletar_page.dart';
 import 'package:flutter_application_praticas/pages/home_page.dart';
 import 'package:flutter_application_praticas/pages/inicio_page.dart';
 import 'options/firebase_options.dart';
