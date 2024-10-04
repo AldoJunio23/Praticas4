@@ -1,144 +1,52 @@
-/*
-
-
-// Card Componente - Produto_Component - 03/10/2024
-// teste:
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import necessário para FilteringTextInputFormatter
 
-class ProdutoCard extends StatefulWidget {
-  final String titulo; // Pode ser "Criar Produto" ou "Alterar Produto"
-  final Function(String nome, String preco, String? categoria) onSubmit; // Função de submissão
-  final String? nomeInicial;
-  final String? precoInicial;
-  final String? categoriaInicial;
+// Componente que representa um item do menu
+class MenuItemCard extends StatelessWidget {
+  final String title; // Nome do item
+  final String price; // Preço do item
+  final String imageAsset; // Caminho da imagem
+  final Function onAdd; // Função a ser chamada ao adicionar
 
-  const ProdutoCard({
-    required this.titulo,
-    required this.onSubmit,
-    this.nomeInicial,
-    this.precoInicial,
-    this.categoriaInicial,
-    super.key,
-  });
-
-  @override
-  _ProdutoCardState createState() => _ProdutoCardState();
-}
-
-class _ProdutoCardState extends State<ProdutoCard> {
-  final TextEditingController _nomeController = TextEditingController();
-  final TextEditingController _precoController = TextEditingController();
-  String? _categoriaSelecionada;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.nomeInicial != null) _nomeController.text = widget.nomeInicial!;
-    if (widget.precoInicial != null) _precoController.text = widget.precoInicial!;
-    _categoriaSelecionada = widget.categoriaInicial;
-  }
-
-  // Função de validação dos campos
-  void _validarCampos() {
-    String nomeProduto = _nomeController.text.trim();
-    String precoProduto = _precoController.text.trim();
-
-    if (nomeProduto.isEmpty ||
-        precoProduto.isEmpty ||
-        _categoriaSelecionada == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Preencha os campos antes de continuar!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    } else if (!_precoValido(precoProduto)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Preço inválido! Por favor, insira apenas números.'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    } else {
-      widget.onSubmit(nomeProduto, precoProduto, _categoriaSelecionada);
-    }
-  }
-
-  // Função para validar se o preço contém apenas números
-  bool _precoValido(String preco) {
-    final RegExp regExp = RegExp(r'^[0-9]+$');
-    return regExp.hasMatch(preco);
-  }
+  const MenuItemCard({
+    Key? key,
+    required this.title,
+    required this.price,
+    required this.imageAsset,
+    required this.onAdd,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.titulo),
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
       ),
-      body: Padding(
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Campo Nome do Produto
-            TextField(
-              controller: _nomeController,
-              decoration: const InputDecoration(
-                labelText: "Nome do produto",
-                border: OutlineInputBorder(),
+            Image.asset(imageAsset, height: 60), // Usando a imagem do assets
+            const SizedBox(height: 8.0),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 25),
-            // Dropdown de Categoria
-            Options(
-              categoriaInicial: _categoriaSelecionada,
-              onCategoriaSelecionada: (String? categoria) {
-                setState(() {
-                  _categoriaSelecionada = categoria;
-                });
-              },
-            ),
-            const SizedBox(height: 25),
-            // Campo Preço do Produto
-            TextField(
-              controller: _precoController,
-              decoration: const InputDecoration(
-                labelText: "Preço do produto",
-                border: OutlineInputBorder(),
+            const SizedBox(height: 4.0),
+            Text(
+              price,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
               ),
-              keyboardType: TextInputType.number,
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly,
-              ],
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 25),
-            // Botão de Ação
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 20.0,
-                      horizontal: 40.0,
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  onPressed: _validarCampos,
-                  child: Text(widget.titulo),
-                ),
-              ],
-            ),
+            const SizedBox(height: 16.0),
           ],
         ),
       ),
@@ -146,56 +54,63 @@ class _ProdutoCardState extends State<ProdutoCard> {
   }
 }
 
-class Options extends StatefulWidget {
-  final ValueChanged<String?> onCategoriaSelecionada;
-  final String? categoriaInicial;
-
-  const Options({required this.onCategoriaSelecionada, this.categoriaInicial, Key? key})
-      : super(key: key);
-
-  @override
-  _OptionsState createState() => _OptionsState();
-}
-
-class _OptionsState extends State<Options> {
-  String? _selecionarOpcoes;
-
-  final List<String> _opcoes = [
-    "Entrada",
-    "Prato Principal",
-    "Sobremesa",
-    "Bebida"
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _selecionarOpcoes = widget.categoriaInicial;
-  }
+// Tela principal
+class ProductPage extends StatelessWidget {
+  const ProductPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton<String>(
-      hint: const Text("Selecione a categoria do produto"),
-      value: _selecionarOpcoes,
-      icon: const Icon(Icons.keyboard_arrow_down),
-      isExpanded: true,
-      items: _opcoes.map((String opcao) {
-        return DropdownMenuItem(
-          value: opcao,
-          child: Text(opcao),
-        );
-      }).toList(),
-      onChanged: (String? novoValor) {
-        setState(() {
-          _selecionarOpcoes = novoValor;
-        });
-        widget.onCategoriaSelecionada(novoValor);
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Geral - Produtos'), // Menu
+        centerTitle: true,
+        titleTextStyle:
+            const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+        backgroundColor: Colors.blue,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(50.0), // antes 16
+        child: GridView.count(
+          crossAxisCount: 3, // Alterado para 3 colunas
+          crossAxisSpacing: 16.0, // Espaçamento horizontal
+          mainAxisSpacing: 16.0, // Espaçamento vertical
+          childAspectRatio:
+              0.75, // Ajustado para melhorar a proporção dos cards
+          children: List.generate(6, (index) {
+            // Lista de produtos
+            final List<String> productTitles = [
+              'Produto A',
+              'Produto B',
+              'Produto C',
+              'Produto D',
+              'Produto E',
+              'Produto F'
+            ];
+
+            // Lista de preços
+            final List<String> productPrices = [
+              '\$5.99 reais',
+              '\$10.49 reais',
+              '\$15.99 reais',
+              '\$20.99 reais',
+              '\$25.49 reais',
+              '\$30.99 reais'
+            ];
+
+            return MenuItemCard(
+              title: productTitles[index], // Nome do produto
+              price: productPrices[index], // Preço correspondente
+              imageAsset:
+                  'assets/comando-github-praticas4.png', // Caminho da imagem
+              onAdd: () {
+                //print(
+                //    '${productTitles[index]} adicionado'); // Mensagem no console
+                Text('${productTitles[index]} adicionado');
+              },
+            );
+          }),
+        ),
+      ),
     );
   }
 }
-
-
-*/
-
