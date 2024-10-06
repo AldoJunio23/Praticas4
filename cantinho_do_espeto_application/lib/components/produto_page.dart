@@ -1,6 +1,158 @@
 import 'package:flutter/material.dart';
 import 'produto_detalhes.dart';
 
+class PaginaProduto extends StatefulWidget {
+  const PaginaProduto({Key? key}) : super(key: key);
+
+  @override
+  _PaginaProdutoState createState() => _PaginaProdutoState();
+}
+
+class _PaginaProdutoState extends State<PaginaProduto> {
+  // Lista para armazenar os produtos selecionados
+  List<Map<String, String>> produtosSelecionados = [];
+
+  @override
+  Widget build(BuildContext context) {
+    final List<String> productTitles = [
+      'Produto A',
+      'Produto B',
+      'Produto C',
+      'Produto D',
+      'Produto E',
+      'Produto F'
+    ];
+
+    final List<String> productPrices = [
+      '\$5.99',
+      '\$10.49',
+      '\$15.99',
+      '\$20.99',
+      '\$25.49',
+      '\$30.99'
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Geral - Produtos'),
+        centerTitle: true,
+        backgroundColor: Colors.blue,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: GridView.count(
+          crossAxisCount: 2, // Exibe 2 cards por linha
+          crossAxisSpacing: 16.0,
+          mainAxisSpacing: 16.0,
+          children: List.generate(productTitles.length, (index) {
+            return MenuItemCard(
+              title: productTitles[index],
+              price: productPrices[index],
+              imageAsset: 'assets/comando-github-praticas4.png',
+              onAdd: () {
+                setState(() {
+                  // Adiciona o produto à lista
+                  produtosSelecionados.add({
+                    'title': productTitles[index],
+                    'price': productPrices[index],
+                  });
+                });
+              },
+            );
+          }),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.orange,
+        onPressed: () {
+          // Ao pressionar, vá para a página de detalhes e passe a lista de produtos
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetalhesProdutos(
+                produtosSelecionados: produtosSelecionados,
+              ),
+            ),
+          );
+        },
+        child: const Icon(Icons.shopping_cart),
+      ),
+    );
+  }
+}
+
+class MenuItemCard extends StatelessWidget {
+  final String title;
+  final String price;
+  final String imageAsset;
+  final VoidCallback onAdd;
+
+  const MenuItemCard({
+    Key? key,
+    required this.title,
+    required this.price,
+    required this.imageAsset,
+    required this.onAdd,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 4.0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(imageAsset, height: 60),
+            const SizedBox(height: 8.0),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4.0),
+            Text(
+              price,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.grey,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16.0),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: ElevatedButton(
+                onPressed: onAdd,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  shape: const CircleBorder(),
+                  padding: const EdgeInsets.all(10),
+                ),
+                child: const Icon(Icons.add, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+
+/*
+
+import 'package:flutter/material.dart';
+import 'produto_detalhes.dart';
+
 // Componente que representa um item do menu
 class MenuItemCard extends StatelessWidget {
   final String title; // Nome do item
@@ -64,7 +216,7 @@ class MenuItemCard extends StatelessWidget {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange, // Cor de fundo laranja
+                  backgroundColor: Colors.green, // Cor de fundo laranja
                   shape: const CircleBorder(), // Botão circular
                   padding: const EdgeInsets.all(15), // Tamanho do botão
                 ),
@@ -93,7 +245,7 @@ class PaginaProduto extends StatelessWidget {
         centerTitle: true,
         titleTextStyle:
             const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.orange, // blue
       ),
       body: Padding(
         padding: const EdgeInsets.all(50.0), // antes 16
@@ -148,3 +300,5 @@ class PaginaProduto extends StatelessWidget {
     );
   }
 }
+
+*/
