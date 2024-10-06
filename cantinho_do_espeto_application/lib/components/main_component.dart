@@ -3,7 +3,9 @@
 // flutter run
 
 import 'package:flutter/material.dart';
-import 'produto_component.dart'; // Importa o arquivo onde o componente de produto está definido
+import 'produto_page.dart'; // Importa o arquivo onde o componente de produto está definido
+
+//import 'produto_detalhes.dart'; // Importa o arquivo onde o componente de produto está definido
 
 // Função principal que inicia o aplicativo
 void main() {
@@ -15,9 +17,17 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       title: 'Práticas Profissionais IV - Componente', // Menu de Restaurante
-      home: ProductPage(), // Chama a tela de produtos
+
+      debugShowCheckedModeBanner: false,
+      initialRoute: 'home', // // rota nominada, ao invés de usar Navigator
+
+      routes: {
+        'home': (context) => const PaginaProduto(), // Chama a tela de produtos
+
+        //'detalhes': (context) => const DetalhesProduto(),   // rotas nominadas com parâmetros
+      },
     );
   }
 }

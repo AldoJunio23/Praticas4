@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'produto_detalhes.dart';
 
 // Componente que representa um item do menu
 class MenuItemCard extends StatelessWidget {
@@ -47,6 +48,32 @@ class MenuItemCard extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16.0),
+
+            Align(
+              alignment:
+                  Alignment.bottomRight, // Posiciona no canto inferior direito
+              child: ElevatedButton(
+                onPressed: () {
+                  // Função ao clicar no botão: Navega para a página de detalhes
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DetalhesProduto(
+                          productName: title, productPrice: price),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange, // Cor de fundo laranja
+                  shape: const CircleBorder(), // Botão circular
+                  padding: const EdgeInsets.all(15), // Tamanho do botão
+                ),
+                child: const Icon(
+                  Icons.add,
+                  color: Colors.white,
+                ),
+              ),
+            )
           ],
         ),
       ),
@@ -55,8 +82,8 @@ class MenuItemCard extends StatelessWidget {
 }
 
 // Tela principal
-class ProductPage extends StatelessWidget {
-  const ProductPage({Key? key}) : super(key: key);
+class PaginaProduto extends StatelessWidget {
+  const PaginaProduto({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -103,9 +130,16 @@ class ProductPage extends StatelessWidget {
               imageAsset:
                   'assets/comando-github-praticas4.png', // Caminho da imagem
               onAdd: () {
-                //print(
-                //    '${productTitles[index]} adicionado'); // Mensagem no console
-                Text('${productTitles[index]} adicionado');
+                // Aqui navega para a página de detalhes do produto
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => DetalhesProduto(
+                            productName: productTitles[
+                                index], // Passando o nome do produto
+                            productPrice: productPrices[
+                                index] // Passando o preço do produto
+                            )));
               },
             );
           }),
