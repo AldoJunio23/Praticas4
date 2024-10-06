@@ -5,8 +5,6 @@
 import 'package:flutter/material.dart';
 import 'produto_page.dart'; // Importa o arquivo onde o componente de produto está definido
 
-//import 'produto_detalhes.dart'; // Importa o arquivo onde o componente de produto está definido
-
 // Função principal que inicia o aplicativo
 void main() {
   runApp(const MyApp());
