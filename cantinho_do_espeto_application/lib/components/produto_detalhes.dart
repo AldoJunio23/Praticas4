@@ -77,10 +77,39 @@ class _DetalhesProdutosState extends State<DetalhesProdutos> {
 
                           // Botão de remover
                           IconButton(
-                            //Icons.remove_circle_outline
-                            icon: const Icon(Icons.delete, color: Colors.red),
+                            icon: const Icon(Icons.delete,
+                                color: Colors.red), // Ícone de lixeira
                             onPressed: () {
-                              removerProduto(index);
+                              // Exibir um diálogo de confirmação
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text(
+                                        'Confirmar exclusão de item:'), // "ALERTA, a página diz:"
+                                    content: const Text(
+                                        'Você tem certeza que deseja remover este produto?'),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        child: const Text('Cancelar'),
+                                        onPressed: () {
+                                          Navigator.of(context)
+                                              .pop(); // Fecha o diálogo
+                                        },
+                                      ),
+                                      TextButton(
+                                        child: const Text('Excluir'),
+                                        onPressed: () {
+                                          removerProduto(
+                                              index); // Remove o produto após confirmação
+                                          Navigator.of(context)
+                                              .pop(); // Fecha o diálogo
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
                             },
                           ),
                         ],
