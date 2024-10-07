@@ -20,6 +20,39 @@ class _DetalhesProdutosState extends State<DetalhesProdutos> {
     });
   }
 
+  // Função para finalizar o pedido
+  void finalizarPedido() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Finalizar pedido'),
+          content: const Text('Você realmente deseja fechar o pedido?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+            ),
+            TextButton(
+              child: const Text('Confirmar'),
+              onPressed: () {
+                // Fecha o diálogo
+                Navigator.of(context).pop();
+                // Navega para a nova tela de execução
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TelaEmExecucao()),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,6 +160,7 @@ class _DetalhesProdutosState extends State<DetalhesProdutos> {
               ),
       ),
 
+      /*
       // Botão para voltar à página de produtos
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -137,6 +171,54 @@ class _DetalhesProdutosState extends State<DetalhesProdutos> {
         },
         backgroundColor: Colors.orange, // blue
         child: const Icon(Icons.arrow_back),
+      ),
+      */
+
+      floatingActionButton: Stack(
+        children: <Widget>[
+          Positioned(
+            bottom: 16,
+            right: 80, // Ajuste a posição como preferir
+            child: FloatingActionButton(
+              onPressed: () {
+                Navigator.pop(context, widget.produtosSelecionados);
+              },
+              backgroundColor: Colors.orange,
+              child: const Icon(Icons.arrow_back),
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            right: 16, // Ajuste a posição como preferir
+            child: FloatingActionButton(
+              onPressed: finalizarPedido,
+              backgroundColor: Colors.green,
+              child: const Icon(Icons.check),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// 2. Nova tela para exibir a mensagem "Em execução ..."
+class TelaEmExecucao extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Processando pedido'), // Processando Pedido
+        centerTitle: true,
+        titleTextStyle:
+            const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+        backgroundColor: Colors.orange,
+      ),
+      body: const Center(
+        child: Text(
+          'Em execução ...',
+          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
