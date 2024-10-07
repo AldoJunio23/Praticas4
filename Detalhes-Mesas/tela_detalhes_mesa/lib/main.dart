@@ -95,7 +95,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                 style: TextStyle(fontSize: 25, color: Colors.white),
               ),
 
-              const SizedBox(height: 40), // Aumente esta altura para mais espaçamento
+              const SizedBox(height: 40), 
 
               ElevatedButton(
 
@@ -111,7 +111,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
 
                 style: ElevatedButton.styleFrom(
 
-                  minimumSize: const Size(200, 80), // Ajuste a largura e altura aqui
+                  minimumSize: const Size(200, 80), 
 
                   backgroundColor: const Color.fromARGB(255, 231, 174, 15),
 
@@ -119,7 +119,6 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
 
                     borderRadius: BorderRadius.circular(2),
 
-                    //side: BorderSide(width: 1),
                   ),
                 ),
               ),
