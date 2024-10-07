@@ -2,7 +2,6 @@
 // cd cantinho_do_espeto_application
 // flutter run
 
-// Feito em 06.10.2024
 import 'package:flutter/material.dart';
 import 'produto_page.dart'; // Importa o arquivo onde o componente de produto está definido
 
