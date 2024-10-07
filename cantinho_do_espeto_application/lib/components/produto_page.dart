@@ -43,7 +43,7 @@ class _PaginaProdutoState extends State<PaginaProduto> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Geral - Produtos'),
+        title: const Text('Produtos'), // Geral - Produtos
         centerTitle: true,
         titleTextStyle:
             const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),

@@ -24,7 +24,7 @@ class _DetalhesProdutosState extends State<DetalhesProdutos> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Produtos Selecionados"),
+        title: const Text("Produtos selecionados"), // Produtos Selecionados
         centerTitle: true,
         titleTextStyle:
             const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
