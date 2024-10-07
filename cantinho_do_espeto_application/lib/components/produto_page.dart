@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'produto_detalhes.dart';
 
+// Feito em 06.10.2024
 class PaginaProduto extends StatefulWidget {
   const PaginaProduto({Key? key}) : super(key: key);
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Feito em 06.10.2024
 class DetalhesProdutos extends StatefulWidget {
   final List<Map<String, String>> produtosSelecionados;
 
