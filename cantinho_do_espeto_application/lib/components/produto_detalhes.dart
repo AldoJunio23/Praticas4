@@ -77,8 +77,8 @@ class _DetalhesProdutosState extends State<DetalhesProdutos> {
 
                           // Botão de remover
                           IconButton(
-                            icon: const Icon(Icons.remove_circle_outline,
-                                color: Colors.red),
+                            //Icons.remove_circle_outline
+                            icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () {
                               removerProduto(index);
                             },
@@ -106,7 +106,7 @@ class _DetalhesProdutosState extends State<DetalhesProdutos> {
               widget
                   .produtosSelecionados); // Volta para a tela anterior com a lista de produtos
         },
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.orange, // blue
         child: const Icon(Icons.arrow_back),
       ),
     );
