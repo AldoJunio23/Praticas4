@@ -190,6 +190,8 @@ class _DetalhesProdutosState extends State<DetalhesProdutos> {
   }
 }
 
+/*
+
 // Tela de Processamento de pedidos
 class TelaProcessandoPedido extends StatelessWidget {
   final List<Map<String, String>> produtosSelecionados;
@@ -206,6 +208,17 @@ class TelaProcessandoPedido extends StatelessWidget {
       total += preco;
     }
     return total;
+  }
+
+
+  // Função para exibir uma mensagem na tela usando SnackBar
+  void mostrarMensagem2(String mensagem) {
+    final snackBar = SnackBar(
+      content: Text(mensagem),
+      duration:
+          const Duration(seconds: 2), // Tempo que a mensagem ficará visível
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -298,8 +311,6 @@ class TelaProcessandoPedido extends StatelessWidget {
           ],
         ),
       ),
-
-      /*
       floatingActionButton: Stack(
         children: <Widget>[
           Positioned(
@@ -307,24 +318,181 @@ class TelaProcessandoPedido extends StatelessWidget {
             right: 80, // Ajuste a posição como preferir
             child: FloatingActionButton(
               onPressed: () {
-                Navigator.pop(context, widget.produtosSelecionados);
+                //Navigator.pop(context, widget.produtosSelecionados);
+                mostrarMensagem("Próxima");
               },
               backgroundColor: Colors.orange,
-              child: const Icon(Icons.arrow_back),
+              child: const Icon(Icons.arrow_forward),
             ),
           ),
           Positioned(
             bottom: 16,
             right: 16, // Ajuste a posição como preferir
             child: FloatingActionButton(
-              onPressed: finalizarPedido,
+              //onPressed: finalizarPedido,
+              onPressed: () {
+                mostrarMensagem2("Deletar");
+              }, 
               backgroundColor: Colors.green,
               child: const Icon(Icons.check),
             ),
           ),
         ],
       ),
-      */
+    );
+  }
+}
+
+*/
+
+class TelaProcessandoPedido extends StatefulWidget {
+  final List<Map<String, String>> produtosSelecionados;
+
+  // Construtor para receber os produtos selecionados
+  TelaProcessandoPedido({required this.produtosSelecionados});
+
+  @override
+  _TelaProcessandoPedidoState createState() => _TelaProcessandoPedidoState();
+}
+
+class _TelaProcessandoPedidoState extends State<TelaProcessandoPedido> {
+  // Função para calcular a soma dos preços dos produtos
+  double calcularPrecoTotal() {
+    double total = 0.0;
+    for (var produto in widget.produtosSelecionados) {
+      // Remove o símbolo '$' e converte a string em double
+      double preco = double.parse(produto['price']!.replaceAll('\$', ''));
+      total += preco;
+    }
+    return total;
+  }
+
+  // Função para exibir uma mensagem na tela usando SnackBar
+  void mostrarMensagem2(BuildContext context, String mensagem) {
+    final snackBar = SnackBar(
+      content: Text(mensagem),
+      duration:
+          const Duration(seconds: 2), // Tempo que a mensagem ficará visível
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Calcula o preço total dos produtos
+    double precoTotal = calcularPrecoTotal();
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Processando pedido'), // Processando Pedido
+        centerTitle: true,
+        titleTextStyle:
+            const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+        backgroundColor: Colors.orange,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment:
+              MainAxisAlignment.spaceBetween, // Distribui os itens na tela
+          children: [
+            // Lista de produtos
+            Expanded(
+              child: widget.produtosSelecionados.isNotEmpty
+                  ? ListView.builder(
+                      itemCount: widget.produtosSelecionados.length,
+                      itemBuilder: (context, index) {
+                        final produto = widget.produtosSelecionados[index];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  // Nome do produto
+                                  Text(
+                                    produto['title']!,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  // Preço do produto
+                                  Text(
+                                    produto['price']!,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8.0),
+                            ],
+                          ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Text(
+                        'Nenhum produto selecionado.',
+                        style: TextStyle(fontSize: 24),
+                      ),
+                    ),
+            ),
+            // Textos fixos no final da tela
+            Column(
+              children: [
+                const Text(
+                  "Mesa: XX",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  "Preço total: \$${precoTotal.toStringAsFixed(2)}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: Stack(
+        children: <Widget>[
+          Positioned(
+            bottom: 16,
+            right: 80, // Ajuste a posição como preferir
+            child: FloatingActionButton(
+              onPressed: () {
+                mostrarMensagem2(context, "Fechar - Voltar para tela inicial");
+              },
+              backgroundColor: Colors.orange,
+              child: const Icon(Icons.exit_to_app),
+            ),
+          ),
+          Positioned(
+            bottom: 16,
+            right: 16, // Ajuste a posição como preferir
+            child: FloatingActionButton(
+              onPressed: () {
+                mostrarMensagem2(
+                    context, "Finalizar pedido - Ir para próxima tela");
+              },
+              backgroundColor: Colors.green,
+              child: const Icon(Icons.check),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
