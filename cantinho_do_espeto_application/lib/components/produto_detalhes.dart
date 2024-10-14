@@ -213,14 +213,40 @@ class _TelaProcessandoPedidoState extends State<TelaProcessandoPedido> {
     return total;
   }
 
-  // Função para exibir uma mensagem na tela usando SnackBar
-  void mostrarMensagem2(BuildContext context, String mensagem) {
-    final snackBar = SnackBar(
-      content: Text(mensagem),
-      duration:
-          const Duration(seconds: 2), // Tempo que a mensagem ficará visível
+  // Função para finalizar o pedido
+  void finalizarPedido() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Finalizar pedido'),
+          content: const Text('Você realmente deseja fechar o pedido?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+            ),
+            TextButton(
+              child: const Text('Confirmar'),
+              onPressed: () {
+                // Fecha o diálogo
+                Navigator.of(context).pop();
+                // Navega para a nova tela de execução
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => TelaProcessandoPedido(
+                            produtosSelecionados: widget.produtosSelecionados,
+                          )),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
   @override
@@ -319,8 +345,6 @@ class _TelaProcessandoPedidoState extends State<TelaProcessandoPedido> {
             right: 80, // Ajuste a posição como preferir
             child: FloatingActionButton(
               onPressed: () {
-                //mostrarMensagem2(context, "Fechar - Voltar para tela inicial");
-
                 Navigator.pop(context); // Volta para a tela inicial
               },
               backgroundColor: Colors.orange,
@@ -331,9 +355,9 @@ class _TelaProcessandoPedidoState extends State<TelaProcessandoPedido> {
             bottom: 16,
             right: 16, // Ajuste a posição como preferir
             child: FloatingActionButton(
-              onPressed: () {
-                //mostrarMensagem2(context, "Finalizar pedido - Ir para próxima tela");
+              //onPressed: finalizarPedido,
 
+              onPressed: () {
                 // Navega para a nova página (ex: Tela de Resumo)
                 Navigator.push(
                   context,
@@ -343,6 +367,7 @@ class _TelaProcessandoPedidoState extends State<TelaProcessandoPedido> {
                   ),
                 );
               },
+
               backgroundColor: Colors.green,
               child: const Icon(Icons.check),
             ),
@@ -379,7 +404,7 @@ class TelaResumo extends StatelessWidget {
               CrossAxisAlignment.center, // Centraliza horizontalmente
           children: [
             Text(
-              "Hello World",
+              "Fim",
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -392,3 +417,79 @@ class TelaResumo extends StatelessWidget {
     );
   }
 }
+
+
+
+/*
+
+// Tela de Resumo dos Produtos
+class TelaResumo extends StatelessWidget {
+  final List<Map<String, String>> produtosSelecionados;
+
+  const TelaResumo({Key? key, required this.produtosSelecionados})
+      : super(key: key);
+
+  // Função para finalizar o pedido
+  void avancarPedido(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Finalizar pedido'),
+          content: const Text('Você realmente deseja fechar o pedido?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Fecha o diálogo
+              },
+            ),
+            TextButton(
+              child: const Text('Confirmar'),
+              onPressed: () {
+                // Fecha o diálogo
+                Navigator.of(context).pop();
+                // Navega para a nova tela de execução
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TelaProcessandoPedido(
+                      produtosSelecionados: produtosSelecionados,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Resumo do Pedido'),
+        backgroundColor: Colors.orange,
+      ),
+      body: ListView.builder(
+        itemCount: produtosSelecionados.length,
+        itemBuilder: (context, index) {
+          final produto = produtosSelecionados[index];
+          return ListTile(
+            title: Text(produto['title']!),
+            subtitle: Text(produto['price']!),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () =>
+            avancarPedido(context), // Chama a função ao pressionar o botão
+        backgroundColor: Colors.green,
+        child: const Icon(Icons.check),
+      ),
+    );
+  }
+}
+*/
