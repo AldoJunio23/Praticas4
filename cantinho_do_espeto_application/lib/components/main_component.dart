@@ -3,9 +3,8 @@
 // flutter run
 
 import 'package:flutter/material.dart';
-import 'produto_page.dart'; // Importa o arquivo onde o componente de produto está definido
+import 'produto_page.dart';
 
-// Função principal que inicia o aplicativo
 void main() {
   runApp(const MyApp());
 }
@@ -23,8 +22,6 @@ class MyApp extends StatelessWidget {
 
       routes: {
         'home': (context) => const PaginaProduto(), // Chama a tela de produtos
-
-        //'detalhes': (context) => const DetalhesProduto(),   // rotas nominadas com parâmetros
       },
     );
   }

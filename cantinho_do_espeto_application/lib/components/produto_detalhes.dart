@@ -159,21 +159,6 @@ class _DetalhesProdutosState extends State<DetalhesProdutos> {
                 ),
               ),
       ),
-
-      /*
-      // Botão para voltar à página de produtos
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pop(
-              context,
-              widget
-                  .produtosSelecionados); // Volta para a tela anterior com a lista de produtos
-        },
-        backgroundColor: Colors.orange, // blue
-        child: const Icon(Icons.arrow_back),
-      ),
-      */
-
       floatingActionButton: Stack(
         children: <Widget>[
           Positioned(
@@ -202,7 +187,7 @@ class _DetalhesProdutosState extends State<DetalhesProdutos> {
   }
 }
 
-// 2. Nova tela para exibir a mensagem "Em execução ..."
+// Tela de Processamento de pedidos
 class TelaEmExecucao extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
