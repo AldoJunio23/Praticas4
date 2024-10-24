@@ -1,58 +1,62 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/pages/esquecisenha_page.dart';
+import 'package:flutter_application_praticas/pages/home_page.dart';
+import 'package:flutter_application_praticas/services/auth_service.dart';
 
-void main() {
-  runApp(const MaterialApp(debugShowCheckedModeBanner: false, home: TelaCadastro()));
-}
-
-class TelaCadastro extends StatefulWidget {
-  const TelaCadastro({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
 
   @override
-  TelaCadastroState createState() => TelaCadastroState();
+  LoginPageState createState() => LoginPageState(); 
 }
 
-class TelaCadastroState extends State<TelaCadastro> {
-  // Controladores para os campos de texto
-  final TextEditingController _nomeController = TextEditingController();
+class LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _senhaController = TextEditingController();
-  final TextEditingController _confSenhaController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  // Função que será chamada ao pressionar o botão "Criar"
-  void _criarConta() {
-    final nome = _nomeController.text;
-    final email = _emailController.text;
-    final senha = _senhaController.text;
-    final confSenha = _confSenhaController.text;
+  final AuthService _authService = AuthService();
+  String? _errorMessage;
 
-    
-    if (nome.isEmpty || email.isEmpty || senha.isEmpty || confSenha.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Todos os campos devem ser preenchidos.")),
+  login() async {
+    setState(() {
+      _errorMessage = null;
+    });
+
+    String email = _emailController.text.trim();
+    String password = _passwordController.text.trim();
+
+    try {
+      final user = await _authService.login(
+        email: email,
+        senha: password,
       );
-      return;
-    }
 
-    if (senha != confSenha) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("As senhas não coincidem.")),
-      );
-      return;
+      if (user != null) {
+        print("Login bem-sucedido!");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ),
+        );
+      } else {
+        setState(() {
+          _errorMessage = "Erro de login: usuário não encontrado";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+      });
+      print("Erro de login: $_errorMessage");
     }
-
-   
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Conta criada com sucesso!")),
-    );
   }
-
- 
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: const EdgeInsets.all(70),
+        padding: const EdgeInsets.symmetric(vertical: 30),
         width: double.infinity,
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -64,38 +68,18 @@ class TelaCadastroState extends State<TelaCadastro> {
             ],
           ),
         ),
-        
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            // Título e subtítulo
-            IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () {
-                Navigator.pop(context); // Voltar para a tela anterior
-              },
+            // Logo na parte superior
+            Center(
+              child: Image.asset(
+                'assets/logo.png',
+                height: 300, // Ajuste a altura conforme necessário
+                width: 300,  // Ajuste a largura conforme necessário
+              ),
             ),
-            const Column(
-              children: [
-                Text(
-                  "Cadastro",
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  "Bem-Vindo ao Cantinho do Espeto",
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
-                Padding(padding: EdgeInsets.all(10)),
-              ],
-            ),
+            const SizedBox(height: 20),
+            // Seção de login
             Expanded(
               child: Container(
                 decoration: const BoxDecoration(
@@ -109,9 +93,7 @@ class TelaCadastroState extends State<TelaCadastro> {
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     children: <Widget>[
-                      const SizedBox(
-                        height: 20,
-                      ),
+                      const SizedBox(height: 20),
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
@@ -127,65 +109,61 @@ class TelaCadastroState extends State<TelaCadastro> {
                         ),
                         child: Column(
                           children: <Widget>[
-                            const SizedBox(height: 30),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              child: TextField(
-                                controller: _nomeController,
-                                decoration: const InputDecoration(
-                                  labelText: "Nome do Usuário",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                            TextField(
+                              controller: _emailController,
+                              decoration: const InputDecoration(
+                                hintText: "Email",
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                            const SizedBox(height: 25.5),
+                            TextField(
+                              controller: _passwordController,
+                              obscureText: true,
+                              decoration: const InputDecoration(
+                                hintText: "Password",
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                            const SizedBox(height: 25.5),
+                            InkWell(
+                              onTap: login,
+                              child: Container(
+                                height: 50,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(50),
+                                  color: Colors.orange[900]!,
+                                ),
+                                child: const Center(
+                                  child: Text(
+                                    "Login",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              child: TextField(
-                                controller: _emailController,
-                                keyboardType: TextInputType.emailAddress,
-                                decoration: const InputDecoration(
-                                  labelText: "Email",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                            const SizedBox(height: 10),
+                            InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const TelaEsqueci(),
                                   ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              child: TextField(
-                                controller: _senhaController,
-                                obscureText: true, // Esconde a senha
-                                decoration: const InputDecoration(
-                                  labelText: "Senha",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 15),
-                              child: TextField(
-                                controller: _confSenhaController,
-                                obscureText: true, // Esconde a senha
-                                decoration: const InputDecoration(
-                                  labelText: "Confirmar Senha",
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.all(Radius.circular(20)),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 25),
-                              child: ElevatedButton(
-                                onPressed: _criarConta,
-                                child: const Text(
-                                  "Criar",
-                                  style: TextStyle(fontSize: 20),
+                                );
+                              },
+                              child: const Text(
+                                "Esqueci minha senha.",
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                  decoration: TextDecoration.underline,
                                 ),
                               ),
                             ),
@@ -196,7 +174,7 @@ class TelaCadastroState extends State<TelaCadastro> {
                   ),
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_praticas/components/custom_drawer.dart';
 import 'package:flutter_application_praticas/pages/detalhes_mesa_page.dart';
 
 class TelaMesas extends StatefulWidget {
@@ -15,90 +16,7 @@ class TelaMesasState extends State<TelaMesas> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(
-        child: ListView(
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.fromLTRB(15, 5, 5, 5),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.orange[900]!.withOpacity(0.8),
-                    Colors.orange[700]!.withOpacity(0.8),
-                    Colors.orange[500]!.withOpacity(0.8),
-                  ],
-                  stops: const [0.0, 0.3, 1.0],
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Menu",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white, fontSize: 24),
-                  ),
-                  Builder(
-                    builder: (context) {
-                      return IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      );
-                    },
-                  ),
-                ],
-            ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-               Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.home), // home
-                    title: const Text('Início'), // Início
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.book), // home
-                    title: const Text('Histórico'), // Início
-                    onTap: () {
-
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.restaurant_menu),
-                    title: const Text('Cardápio'),
-                    onTap: () {
-
-                    },
-                  ),
-                ],
-              ),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 270)),
-              Column(
-                children: [ // espaço entre os demais itens da lista
-                ListTile(
-                  leading: const Icon(Icons.exit_to_app),
-                  title: const Text('Sair'),
-                  onTap: () {
-                    // ação
-                  },
-                ),],
-              ) 
-            ],  
-            )
-          ],
-        ),
-      ),
+      drawer: const CustomDrawer(), // Usando o CustomDrawer
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60.0),
         child: AppBar(
@@ -116,37 +34,30 @@ class TelaMesasState extends State<TelaMesas> {
               border: const Border(
                 bottom: BorderSide(
                   color: Colors.white,
-                  width: 1
-                )
-              )
+                  width: 1,
+                ),
+              ),
             ),
           ),
-          title: const Text('Mesas', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+          title: const Text('Mesas', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
           leading: Builder(
             builder: (BuildContext context) {
               return IconButton(
-                icon: const Icon(Icons.menu, color: Colors.white,),
-                onPressed: () { Scaffold.of(context).openDrawer(); },
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
                 tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
               );
             },
           ),
         ),
-      ),
+      ), 
       body: Container(
         padding: const EdgeInsets.symmetric(vertical: 2),
         height: double.infinity,
         width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            colors: [
-              Colors.orange[900]!,
-              Colors.orange[800]!,
-              Colors.orange[400]!,
-            ],
-          ),
-        ),
+        color: Colors.white,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(30),
           child: StreamBuilder<QuerySnapshot>(

@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/components/custom_drawer.dart';
 import 'package:flutter_application_praticas/pages/criar_pedidos_page.dart';
 
 
@@ -24,33 +25,44 @@ class _TelaComandasState extends State<TelaComandas>
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.grey,
-        title: const Row(
-
-          mainAxisAlignment: MainAxisAlignment.start, // Alinha à esquerda
-          children: [
-
-            Text("Comandas"),
-          ]
-
-        ),
-        actions: [
-          // Você pode manter o botão de adicionar na AppBar se quiser
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () {
-               Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CriarPedidosPage()),
-            );
+      drawer: const CustomDrawer(), // Usando o CustomDrawer
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: AppBar(
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.orange[900]!.withOpacity(1),
+                  Colors.orange[900]!.withOpacity(0.9),
+                ],
+                stops: const [0.6, 1],
+              ),
+              border: const Border(
+                bottom: BorderSide(
+                  color: Colors.white,
+                  width: 1,
+                ),
+              ),
+            ),
+          ),
+          title: const Text('Comandas', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              );
             },
           ),
-        ],
+        ),
       ),
-
       body: SingleChildScrollView(
         
         padding: const EdgeInsets.all(30.0),
@@ -120,65 +132,7 @@ class _TelaComandasState extends State<TelaComandas>
           ],
         ),
       ),
-      
-       drawer: const Drawer(
-        backgroundColor: Color.fromARGB(200, 158, 158, 158),
-
-        child: Column(
-
-          crossAxisAlignment: CrossAxisAlignment.start,
-
-          children: [
-
-            SizedBox(height: 20), // Adiciona um espaçamento
-
-            ListTile(
-
-              leading: Icon(Icons.home, color: Colors.white),
-
-              title: Text('Início'),
-
-              textColor: Colors.white,
-
-            ),
-
-            ListTile(
-
-              leading: Icon(Icons.book, color: Colors.white),
-              title: Text('Histórico'),
-              textColor: Colors.white,
-
-            ),
-
-            ListTile(
-
-              leading: Icon(Icons.restaurant, color: Colors.white),
-              title: Text('Produtos'),
-              textColor: Colors.white,
-
-            ),
-
-            ListTile(
-
-              leading: Icon(Icons.restaurant_menu, color: Colors.white),
-              title: Text('Cardápio'),
-              textColor: Colors.white,
-
-            ),
-
-            ListTile(
-
-              leading: Icon(Icons.exit_to_app, color: Colors.white),
-              title: Text('Sair'),
-              textColor: Colors.white,
-
-            ),
-
-          ],
-
-        ),
-      ),
-
+  
     );
 
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_praticas/components/custom_drawer.dart';
 import 'package:flutter_application_praticas/services/pedido_service.dart';
 
 class CozinhaPage extends StatefulWidget {
@@ -11,25 +12,25 @@ class CozinhaPage extends StatefulWidget {
 
 class _CozinhaPage extends State<CozinhaPage> {
 
-  Future<void> _finalizarPedido(String pedidoId, BuildContext context) async {
-    try {
-      await PedidoService().finalizarPedido(pedidoId);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pedido finalizado com sucesso!')),
-      );
+    Future<void> _finalizarPedido(String pedidoId, BuildContext context) async {
+      try {
+        await PedidoService().finalizarPedido(pedidoId);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Pedido finalizado com sucesso!')),
+        );
 
-      setState((){});
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao finalizar pedido: $e')),
-      );
+        setState((){});
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao finalizar pedido: $e')),
+        );
+      }
     }
-  }
-  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+     drawer: const CustomDrawer(), // Usando o CustomDrawer
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60.0),
         child: AppBar(
@@ -47,27 +48,29 @@ class _CozinhaPage extends State<CozinhaPage> {
               border: const Border(
                 bottom: BorderSide(
                   color: Colors.white,
-                  width: 1
-                )
-              )
+                  width: 1,
+                ),
+              ),
             ),
           ),
-          title: const Text('Cozinha', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+          title: const Text('Cozinha', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              );
+            },
+          ),
         ),
-      ),
+      ), 
       body: Container(
         padding: const EdgeInsets.symmetric(vertical:2),
         width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            colors: [
-              Colors.orange[900]!,
-              Colors.orange[800]!,
-              Colors.orange[400]!,
-            ],
-          ),
-        ),
+        color: Colors.white,
         child: FutureBuilder<List<Map<String, dynamic>>>(
           future: PedidoService().buscarPedidos(),
           builder: (context, snapshot) {

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_praticas/pages/cozinha_page.dart';
-import 'package:flutter_application_praticas/pages/crud_pages/deletar_page.dart';
+import 'package:flutter_application_praticas/pages/login_page.dart';
+import 'package:google_fonts/google_fonts.dart'; // Importa o Google Fonts
 import 'package:flutter_application_praticas/pages/home_page.dart';
-import 'package:flutter_application_praticas/pages/inicio_page.dart';
 import 'options/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -19,10 +18,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      theme: ThemeData(
+        textTheme: GoogleFonts.montserratTextTheme( // Define a fonte padrão para todo o tema
+          Theme.of(context).textTheme, // Mantém outros estilos de texto padrão
+        ),
+      ),
       debugShowCheckedModeBanner: false,
       title: 'Flutter Application PraticasIV',
-      home: TelaInicio(),
+      home: const HomePage(),
     );
   }
 }

@@ -1,181 +1,181 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_praticas/pages/esquecisenha_page.dart';
-import 'package:flutter_application_praticas/pages/inicio_page.dart';
-import 'package:flutter_application_praticas/services/auth_service.dart';
+import 'package:flutter_application_praticas/components/custom_drawer.dart';
+import 'package:flutter_application_praticas/pages/admin_page.dart';
+import 'package:flutter_application_praticas/pages/comandas_page.dart';
+import 'package:flutter_application_praticas/pages/cozinha_page.dart';
+import 'package:flutter_application_praticas/pages/crud_pages/deletar_page.dart';
+import 'package:flutter_application_praticas/pages/mesas_page.dart';
+import 'package:flutter_application_praticas/pages/selecao_pages/cardapio_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-
+  
   @override
-  HomePageState createState() => HomePageState();
+  HomePageState createState() => HomePageState(); 
 }
 
 class HomePageState extends State<HomePage> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  final AuthService _authService = AuthService();
-  String? _errorMessage;
-
-  login() async {
-    setState(() {
-      _errorMessage = null;
-    });
-
-    String email = _emailController.text.trim();
-    String password = _passwordController.text.trim();
-
-    try {
-      final user = await _authService.login(
-        email: email,
-        senha: password,
-      );
-
-      if (user != null) {
-        print("Login bem-sucedido!");
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TelaInicio(),
-          ),
-        );
-      } else {
-        setState(() {
-          _errorMessage = "Erro de login: usuário não encontrado";
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString();
-      });
-      print("Erro de login: $_errorMessage");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Pega o tamanho da tela para torná-la responsiva
+    double screenHeight = MediaQuery.of(context).size.height;
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.symmetric(vertical: 30),
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            colors: [
-              Colors.orange[900]!,
-              Colors.orange[800]!,
-              Colors.orange[400]!,
-            ],
-          ),
-        ),
-        child: Column(
-          children: <Widget>[
-            // Logo na parte superior
-            Center(
-              child: Image.asset(
-                'assets/logo.png',
-                height: 300, // Ajuste a altura conforme necessário
-                width: 300,  // Ajuste a largura conforme necessário
+      drawer: const CustomDrawer(), // Usando o CustomDrawer
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: AppBar(
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.orange[900]!.withOpacity(1),
+                  Colors.orange[900]!.withOpacity(0.9),
+                ],
+                stops: const [0.6, 1],
+              ),
+              border: const Border(
+                bottom: BorderSide(
+                  color: Colors.white,
+                  width: 1,
+                ),
               ),
             ),
-            const SizedBox(height: 20),
-            // Seção de login
-            Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(60),
-                    topRight: Radius.circular(60),
+          ),
+          title: const Text('Home', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              );
+            },
+          ),
+        ),
+      ), 
+      body: SingleChildScrollView(
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 30),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              colors: [
+                Colors.orange[900]!,
+                Colors.orange[800]!,
+                Colors.orange[400]!,
+              ],
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                
+                Center(
+                  child: Image.asset(
+                    'assets/logo.png',
+                    height: screenHeight * 0.35,
+                    width: screenWidth * 0.55,
                   ),
                 ),
-                child: Padding(
+                const SizedBox(height: 15 ),
+  
+                Container(
                   padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 253, 255, 228),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
                   child: Column(
-                    children: <Widget>[
-                      const SizedBox(height: 20),
-                      Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color.fromRGBO(225, 95, 27, .3),
-                              blurRadius: 20,
-                              offset: Offset(0, 10),
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TelaMesas(),
                             ),
-                          ],
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.3,
+                            vertical: screenHeight * 0.07,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(7.0),
+                          ),
+                          backgroundColor:  const Color.fromARGB(255, 230, 81, 0),
                         ),
-                        child: Column(
-                          children: <Widget>[
-                            TextField(
-                              controller: _emailController,
-                              decoration: const InputDecoration(
-                                hintText: "Email",
-                                hintStyle: TextStyle(color: Colors.grey),
-                                border: InputBorder.none,
-                              ),
+                        child: const Text(
+                          "Mesas",
+                          style: TextStyle(fontSize: 24, color: Colors.white),
+                          
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TelaComandas(),
                             ),
-                            const SizedBox(height: 25.5),
-                            TextField(
-                              controller: _passwordController,
-                              obscureText: true,
-                              decoration: const InputDecoration(
-                                hintText: "Password",
-                                hintStyle: TextStyle(color: Colors.grey),
-                                border: InputBorder.none,
-                              ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.25,
+                            vertical: screenHeight * 0.07,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(7.0),
+                          ),
+                          backgroundColor: const Color.fromARGB(255, 230, 81, 0),
+                        ),
+                        child: const Text(
+                          "Comandas",
+                          style: TextStyle(fontSize: 24, color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CozinhaPage(),
                             ),
-                            const SizedBox(height: 25.5),
-                            InkWell(
-                              onTap: login,
-                              child: Container(
-                                height: 50,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  color: Colors.orange[900]!,
-                                ),
-                                child: const Center(
-                                  child: Text(
-                                    "Login",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const TelaEsqueci(),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                "Esqueci minha senha.",
-                                style: TextStyle(
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ),
-                          ],
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.28,
+                            vertical: screenHeight * 0.07,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(7.0),
+                          ),
+                          backgroundColor:  const Color.fromARGB(255, 230, 81, 0),
+                        ),
+                        child: const Text(
+                          "Cozinha",
+                          style: TextStyle(fontSize: 24, color: Colors.white),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
