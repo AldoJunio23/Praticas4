@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_praticas/pages/detalhes_mesa_page.dart';
 
 class TelaMesas extends StatefulWidget {
   const TelaMesas({super.key});
@@ -173,9 +174,12 @@ class TelaMesasState extends State<TelaMesas> {
                   return ElevatedButton(
                     onPressed: () {
                       // Altera o estado da mesa no Firestore
-                      _firestore.collection('Mesas').doc(mesa.id).update({
-                        'status': !isOcupada,
-                      });
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TelaDetalhesMesas( mesaId: mesa.id,),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.all(25),

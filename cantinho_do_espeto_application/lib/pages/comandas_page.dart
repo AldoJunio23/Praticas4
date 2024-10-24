@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/pages/criar_pedidos_page.dart';
 
 
 class TelaComandas extends StatefulWidget {
@@ -25,204 +26,160 @@ class _TelaComandasState extends State<TelaComandas>
   Widget build(BuildContext context) {
     
     return Scaffold(
-      drawer: Drawer(
-        child: ListView(
-          children: <Widget>[
-            Container(
-              padding: const EdgeInsets.fromLTRB(15, 5, 5, 5),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.orange[900]!.withOpacity(0.8),
-                    Colors.orange[700]!.withOpacity(0.8),
-                    Colors.orange[500]!.withOpacity(0.8),
-                  ],
-                  stops: const [0.0, 0.3, 1.0],
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    "Menu",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white, fontSize: 24),
-                  ),
-                  Builder(
-                    builder: (context) {
-                      return IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      );
-                    },
-                  ),
-                ],
-            ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-               Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.home), // home
-                    title: const Text('Início'), // Início
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pop(context);
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.book), // home
-                    title: const Text('Histórico'), // Início
-                    onTap: () {
+      appBar: AppBar(
+        backgroundColor: Colors.grey,
+        title: const Row(
 
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.restaurant_menu),
-                    title: const Text('Cardápio'),
-                    onTap: () {
+          mainAxisAlignment: MainAxisAlignment.start, // Alinha à esquerda
+          children: [
 
-                    },
-                  ),
-                ],
-              ),
-              const Padding(padding: EdgeInsets.symmetric(vertical: 270)),
-              Column(
-                children: [
-                ListTile(
-                  leading: const Icon(Icons.exit_to_app),
-                  title: const Text('Sair'),
-                  onTap: () {
-                    // ação
-                  },
-                ),],
-              ) 
-            ],  
-            )
-          ],
+            Text("Comandas"),
+          ]
+
         ),
-      ),
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60.0),
-        child: AppBar(
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.orange[900]!.withOpacity(1),
-                  Colors.orange[900]!.withOpacity(0.9),
-                ],
-                stops: const [0.6, 1],
-              ),
-              border: const Border(
-                bottom: BorderSide(
-                  color: Colors.white,
-                  width: 1
-                )
-              )
-            ),
-          ),
-          title: const Text('Comandas', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-          leading: Builder(
-            builder: (BuildContext context) {
-              return IconButton(
-                icon: const Icon(Icons.menu, color: Colors.white,),
-                onPressed: () { Scaffold.of(context).openDrawer(); },
-                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-              );
+        actions: [
+          // Você pode manter o botão de adicionar na AppBar se quiser
+          IconButton(
+            icon: const Icon(Icons.add),
+            onPressed: () {
+               Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CriarPedidosPage()),
+            );
             },
           ),
-        ),
+        ],
       ),
 
-      body: Container(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        height: double.infinity,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            colors: [
-              Colors.orange[900]!,
-              Colors.orange[800]!,
-              Colors.orange[400]!,
-            ],
-          ),
-        ),
-        child: SingleChildScrollView(
-          
-          padding: const EdgeInsets.all(30.0),
+      body: SingleChildScrollView(
+        
+        padding: const EdgeInsets.all(30.0),
 
-          child: Wrap(
+        child: Wrap(
 
-            spacing: 25,
+          spacing: 25,
 
-            runSpacing: 25,
+          runSpacing: 25,
 
-            children: [
+          children: [
 
-              ElevatedButton(
+            ElevatedButton(
 
-                onPressed: adicionarComanda,
+              onPressed: (){
+                  Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CriarPedidosPage()),
+                  );
+              },
 
+              style: ElevatedButton.styleFrom(
+
+                padding: const EdgeInsets.all(25),
+
+                backgroundColor: Colors.grey, // Cor do botão de adicionar
+                shape: RoundedRectangleBorder(
+
+                  borderRadius: BorderRadius.circular(7.0),
+
+                ),
+              ),
+              child: const Text(
+                '+',
+                style: TextStyle(fontSize: 20, color: Colors.white),
+
+              ),
+            ),
+            ...comandas.map((comanda) {
+
+              return ElevatedButton(
+
+                onPressed: () {
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+
+                    SnackBar(content: Text('Comanda $comanda selecionada')),
+
+                  );
+                },
                 style: ElevatedButton.styleFrom(
 
                   padding: const EdgeInsets.all(25),
 
-                  backgroundColor: Colors.grey, // Cor do botão de adicionar
+                  backgroundColor:Color.fromARGB(255, 245, 180, 0), // Cor dos botões de comanda
                   shape: RoundedRectangleBorder(
 
                     borderRadius: BorderRadius.circular(7.0),
-
                   ),
                 ),
-                child: const Text(
-                  '+',
-                  style: TextStyle(fontSize: 20, color: Colors.white),
-
+                child: Text(
+                  '$comanda',
+                  style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
-              ),
-              ...comandas.map((comanda) {
-
-                return ElevatedButton(
-
-                  onPressed: () {
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-
-                      SnackBar(content: Text('Comanda $comanda selecionada')),
-
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-
-                    padding: const EdgeInsets.all(25),
-
-                    backgroundColor:Color.fromARGB(255, 245, 180, 0), // Cor dos botões de comanda
-                    shape: RoundedRectangleBorder(
-
-                      borderRadius: BorderRadius.circular(7.0),
-                    ),
-                  ),
-                  child: Text(
-                    '$comanda',
-                    style: const TextStyle(fontSize: 20, color: Colors.white),
-                  ),
-                );
-              }),
-            ],
-          ),
+              );
+            }).toList(),
+          ],
         ),
-      )
+      ),
+      
+       drawer: const Drawer(
+        backgroundColor: Color.fromARGB(200, 158, 158, 158),
+
+        child: Column(
+
+          crossAxisAlignment: CrossAxisAlignment.start,
+
+          children: [
+
+            SizedBox(height: 20), // Adiciona um espaçamento
+
+            ListTile(
+
+              leading: Icon(Icons.home, color: Colors.white),
+
+              title: Text('Início'),
+
+              textColor: Colors.white,
+
+            ),
+
+            ListTile(
+
+              leading: Icon(Icons.book, color: Colors.white),
+              title: Text('Histórico'),
+              textColor: Colors.white,
+
+            ),
+
+            ListTile(
+
+              leading: Icon(Icons.restaurant, color: Colors.white),
+              title: Text('Produtos'),
+              textColor: Colors.white,
+
+            ),
+
+            ListTile(
+
+              leading: Icon(Icons.restaurant_menu, color: Colors.white),
+              title: Text('Cardápio'),
+              textColor: Colors.white,
+
+            ),
+
+            ListTile(
+
+              leading: Icon(Icons.exit_to_app, color: Colors.white),
+              title: Text('Sair'),
+              textColor: Colors.white,
+
+            ),
+
+          ],
+
+        ),
+      ),
+
     );
+
   }
 }
