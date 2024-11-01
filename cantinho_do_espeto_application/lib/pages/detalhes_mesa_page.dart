@@ -127,7 +127,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                 "Estado da Mesa:",
                 style: TextStyle(fontSize: 30, color: Colors.white),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 15),
               RadioListTile<int>(
                 title: const Text('Ocupado', style: TextStyle(color: Colors.white, fontSize: 20)),
                 value: 1,
@@ -151,9 +151,9 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                     );
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content: Text('Erro ao atualizar o status da mesa'),
-                        duration: const Duration(seconds: 2),
+                        duration: Duration(seconds: 2),
                       ),
                     );
                   }
@@ -183,24 +183,24 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                     );
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content: Text('Erro ao atualizar o status da mesa'),
-                        duration: const Duration(seconds: 2),
+                        duration: Duration(seconds: 2),
                       ),
                     );
                   }
                 },
               ),
-              const SizedBox(height: 130),
+              const SizedBox(height: 30),
               const Text(
                 "Comanda:",
                 style: TextStyle(fontSize: 25, color: Colors.white),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 15),
               produtos.isNotEmpty
                   ? SizedBox(
                       width: 500,
-                      height: 355,
+                      height: 475,
                       child: ListView.builder(
                         scrollDirection: Axis.vertical,
                         itemCount: produtos.length,
@@ -209,7 +209,6 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                           final nome = produto['nome'].toString();
                           final imagem = produto['imagem'].toString();
                           final qtd = produto['qtd'].toString();
-
                           return Container(
                             margin: const EdgeInsets.all(5),
                             decoration: const BoxDecoration(
@@ -243,22 +242,26 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                                       ),
                                     ),
                                     const SizedBox(width: 10),
-                                    Text(
-                                      nome.toUpperCase(),
-                                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    Container(
+                                      width: 190,
+                                      child: 
+                                        Text(
+                                          nome.toUpperCase(),
+                                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                        ),
                                     ),
                                     const SizedBox(width: 20),
                                     Container(
                                       alignment: Alignment.center,
                                       decoration: const BoxDecoration(
-                                        color: Colors.amber,
+                                        color: const Color.fromARGB(255, 230, 81, 0),
                                         borderRadius: BorderRadius.all(Radius.circular(50)),
                                       ),
-                                      width: 50,
-                                      height: 50,
+                                      width: 40,
+                                      height: 40,
                                       child: Text(
                                         "x$qtd",
-                                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                                       ),
                                     ),
                                   ]
@@ -270,19 +273,59 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                       
                     )
                   : const Center(
-                      child: Text("Nenhum produto encontrado.", style: TextStyle(color: Colors.white)),
+                      child: null,
                     ),
-                    IconButton(
-                      padding: const EdgeInsets.all(5),
-                      icon: const Icon(Icons.add, color: Colors.black),
-                      onPressed: (){
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => TelaAdicionarProdutosPedido(pedidoId: pedidoID,)),
-                          );
-                        }
-                      //onPressed
-                    ),
+                    const SizedBox(height: 15),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: (){
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => TelaAdicionarProdutosPedido(pedidoId: pedidoID,)),
+                            );
+                          }, 
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7.0),
+                            ),
+                            backgroundColor:  const Color.fromARGB(255, 230, 81, 0),
+                          ),
+                          child: produtos.isNotEmpty ? 
+                            const Icon(
+                              Icons.brush,
+                              size: 32,
+                              color: Colors.white,
+                            ) : const Text("Adicionar Produtos", style: TextStyle(fontSize: 24, color: Colors.white))
+                        ),
+                        produtos.isNotEmpty ? 
+                        const SizedBox(width: 68) :
+                        const Text(""),
+                        produtos.isNotEmpty ?
+                        ElevatedButton(
+                          onPressed: (){
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => TelaAdicionarProdutosPedido(pedidoId: pedidoID,)),
+                            );
+                          }, 
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.all(15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(7.0),
+                            ),
+                            backgroundColor:  const Color.fromARGB(255, 230, 81, 0),
+                          ),
+                          child: const Text("Finalizar Comanda",
+                            style: TextStyle(fontSize: 24, color: Colors.white),
+                            
+                          ),
+                        ) : const Text(""),
+                      ],
+                    )  
             ],
           ),
         ),

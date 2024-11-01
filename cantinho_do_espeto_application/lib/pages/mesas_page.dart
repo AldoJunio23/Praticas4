@@ -106,24 +106,7 @@ class TelaMesasState extends State<TelaMesas> {
                           style: const TextStyle(fontSize: 20, color: Colors.white),
                         ),
                         const SizedBox(height: 5),
-                        FutureBuilder<List<String>>(
-                          future: _carregarPedidos(mesa['listaPedidos']),
-                          builder: (context, pedidosSnapshot) {
-                            if (pedidosSnapshot.connectionState == ConnectionState.waiting) {
-                              return const CircularProgressIndicator();
-                            } else if (pedidosSnapshot.hasError) {
-                              return const Text('Erro ao carregar pedidos');
-                            } else if (!pedidosSnapshot.hasData || pedidosSnapshot.data!.isEmpty) {
-                              return const Text('Nenhum pedido');
-                            }
-
-                            final pedidos = pedidosSnapshot.data!;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: pedidos.map((pedido) => Text(pedido)).toList(),
-                            );
-                          },
-                        ),
+                        Text(isOcupada ? "Ocupada" : "Disponível", style: const TextStyle(color: Colors.white),)
                       ],
                     ),
                   );
@@ -134,26 +117,6 @@ class TelaMesasState extends State<TelaMesas> {
         ),
       )
     );
-  }
-
-  // Função para carregar os pedidos relacionados às mesas
-  Future<List<String>> _carregarPedidos(List<dynamic> pedidosRefs) async {
-    List<String> pedidos = [];
-
-    for (var ref in pedidosRefs) {
-      // Certifique-se de que 'ref' é uma instância de DocumentReference
-      if (ref is DocumentReference) {
-        // Obtenha o documento de cada referência de pedido
-        DocumentSnapshot pedidoDoc = await ref.get();
-        Map<String, dynamic>? pedidoData = pedidoDoc.data() as Map<String, dynamic>?;
-
-        if (pedidoData != null) {
-          pedidos.add('Total R\$ ${pedidoData['valorTotal']}');
-        }
-      }
-    }
-
-    return pedidos;
   }
 
 }

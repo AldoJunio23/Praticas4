@@ -1,6 +1,6 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_praticas/pages/adicionar_produtos_page.dart';
 
 class CriarPedidosPage extends StatefulWidget {
   const CriarPedidosPage({super.key});
@@ -13,6 +13,7 @@ class _CriarPedidosState extends State<CriarPedidosPage> {
   String? mesaSelecionada;
   List<String> todasMesas = [];
   bool isLoading = true;
+  List<DocumentSnapshot>? pedidos;
 
   @override
   void initState() {
@@ -20,12 +21,9 @@ class _CriarPedidosState extends State<CriarPedidosPage> {
     _obterMesas();  // Carrega todas as mesas ao iniciar
   }
 
-  // Usar o método _carregarNomesMesas para obter todas as mesas
   Future<void> _obterMesas() async {
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('Mesas')
-        .get();
-    
+    QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('Mesas').get();
+
     List<DocumentReference> mesasRefs = snapshot.docs.map((doc) => doc.reference).toList();
     List<String> nomes = await _carregarNomesMesas(mesasRefs);
 
@@ -35,7 +33,6 @@ class _CriarPedidosState extends State<CriarPedidosPage> {
     });
   }
 
-  // Método fornecido que carrega os nomes das mesas
   Future<List<String>> _carregarNomesMesas(List<DocumentReference> mesasRefs) async {
     List<String> nomesMesas = [];
 
@@ -54,10 +51,46 @@ class _CriarPedidosState extends State<CriarPedidosPage> {
     return nomesMesas;
   }
 
-  void _criarPedido(){
-    //criar um novo pedido com a mesa selecionada, horario de criação, finalizado = false e uma lista de produtos vazia
+  Future<String> _criarPedido() async {
+    DocumentReference novoPedidoRef = await FirebaseFirestore.instance.collection('Pedidos').add({
+      'mesa': mesaSelecionada,
+      'dataCriacao': FieldValue.serverTimestamp(),
+      'finalizado': false,
+      'listaProdutos': [],
+      'valorTotal': 0.0,
+    });
+
+    return novoPedidoRef.id; // Retorna o ID do novo pedido
   }
 
+  Future<void> _listarPedidosDaMesa() async {
+    if (mesaSelecionada != null) {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('Pedidos')
+          .where('mesa', isEqualTo: mesaSelecionada)
+          .get();
+
+      setState(() {
+        pedidos = snapshot.docs; // Armazena os pedidos da mesa
+      });
+    }
+  }
+
+  Future<Map<String, dynamic>> _obterDetalhesProduto(DocumentReference produtoRef) async {
+    DocumentSnapshot produtoSnapshot = await produtoRef.get();
+    return produtoSnapshot.data() as Map<String, dynamic>;
+  }
+
+  Future<List<Map<String, dynamic>>> _obterListaProdutos(List<DocumentReference> listaProdutosRefs) async {
+    List<Map<String, dynamic>> produtos = [];
+
+    for (DocumentReference produtoRef in listaProdutosRefs) {
+      Map<String, dynamic> produto = await _obterDetalhesProduto(produtoRef);
+      produtos.add(produto);
+    }
+
+    return produtos;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +132,7 @@ class _CriarPedidosState extends State<CriarPedidosPage> {
                       setState(() {
                         mesaSelecionada = novaMesa;
                       });
+                      _listarPedidosDaMesa(); // Lista pedidos da mesa selecionada
                     },
                     items: todasMesas.map((mesa) {
                       return DropdownMenuItem<String>(
@@ -108,26 +142,109 @@ class _CriarPedidosState extends State<CriarPedidosPage> {
                     }).toList(),
                   ),
                   const SizedBox(height: 20),
-                  const Text('Produtos e Quantidades:'),
+                  const Text('Adicionar Produtos:'),
                   const SizedBox(height: 10),
-                 Container(
+                  Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey, 
-                      borderRadius: BorderRadius.circular(30), 
+                      color: Colors.grey,
+                      borderRadius: BorderRadius.circular(30),
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.add, color: Colors.black),
-                      onPressed: (){
-                        /*if(mesaSelecionada != null){
-                          _criarPedido();
+                      onPressed: () async {
+                        if (mesaSelecionada != null) {
+                          String pedidoId = await _criarPedido();
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const AdicionarProdutosPage()),
-                                );
-                        }*/
-                      },//onPressed
+                            MaterialPageRoute(
+                              builder: (context) => TelaAdicionarProdutosPedido(pedidoId: pedidoId),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Por favor, selecione uma mesa.')),
+                          );
+                        }
+                      },
                     ),
-                  )
+                  ),
+                  const SizedBox(height: 20),
+                  const Text('Pedidos da Mesa:'),
+                  const SizedBox(height: 10),
+                  Expanded(
+                    child: pedidos == null
+                        ? const Text('Nenhum pedido encontrado.')
+                        : ListView.builder(
+                            itemCount: pedidos!.length,
+                            itemBuilder: (context, index) {
+                              var pedido = pedidos![index].data() as Map<String, dynamic>;
+
+                              // Obtém a lista de produtos para o pedido
+                              List<DocumentReference> listaProdutosRefs =
+                                  List<DocumentReference>.from(pedido['listaProdutos']);
+
+                              return FutureBuilder<List<Map<String, dynamic>>>(
+                                future: _obterListaProdutos(listaProdutosRefs),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState == ConnectionState.waiting) {
+                                    return const CircularProgressIndicator();
+                                  }
+
+                                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                    return const Text('Nenhum produto encontrado.');
+                                  }
+
+                                  var produtos = snapshot.data!;
+
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                   children: [
+                                      Text(
+                                    'Pedido ID: ${pedidos![index].id}',
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    'Valor Total: R\$ ${pedido['valorTotal'].toStringAsFixed(2)}',
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  const Text(
+                                    'Produtos:',
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                      for (var produto in produtos)
+                                        ListTile(
+                                          title: Text(produto['nome']),
+                                          subtitle: Text(
+                                            'Valor: R\$ ${pedido['valorTotal']?.toStringAsFixed(2) ?? '0.00'}',
+                                          ), 
+                                        ),
+                                          IconButton(
+                                            icon: const Icon(Icons.edit, color: Colors.black),
+                                            onPressed: () async {
+                                              if (mesaSelecionada != null) {
+                                                String pedidoId = await _criarPedido();
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => TelaAdicionarProdutosPedido(pedidoId: pedidoId),
+                                                  ),
+                                                );
+                                              } else {
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  const SnackBar(content: Text('Por favor, selecione uma mesa.')),
+                                                );
+                                              }
+                                            },
+                                          ),
+                                      const SizedBox(height: 20),
+                                    ],
+
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                  ),
                 ],
               ),
             ),
