@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_praticas/pages/login_page.dart';
 import 'package:google_fonts/google_fonts.dart'; // Importa o Google Fonts
 import 'package:flutter_application_praticas/pages/home_page.dart';
 import 'options/firebase_options.dart';

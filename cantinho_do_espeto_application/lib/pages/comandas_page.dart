@@ -117,7 +117,7 @@ class _TelaComandasState extends State<TelaComandas>
 
                   padding: const EdgeInsets.all(25),
 
-                  backgroundColor:Color.fromARGB(255, 245, 180, 0), // Cor dos botões de comanda
+                  backgroundColor:const Color.fromARGB(255, 245, 180, 0), // Cor dos botões de comanda
                   shape: RoundedRectangleBorder(
 
                     borderRadius: BorderRadius.circular(7.0),
@@ -128,7 +128,7 @@ class _TelaComandasState extends State<TelaComandas>
                   style: const TextStyle(fontSize: 20, color: Colors.white),
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

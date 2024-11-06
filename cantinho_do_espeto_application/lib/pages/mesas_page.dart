@@ -16,7 +16,7 @@ class TelaMesasState extends State<TelaMesas> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const CustomDrawer(), // Usando o CustomDrawer
+      drawer: const CustomDrawer(), // Usando o nosso CustomDrawer
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60.0),
         child: AppBar(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -10,6 +12,8 @@ class MyApp extends StatelessWidget {
 }
 
 class TelaPratoPrincipal extends StatelessWidget {
+  const TelaPratoPrincipal({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -185,7 +189,7 @@ void _showLoadingThenNavigate(BuildContext context, String routeName) {
   );
 
   // Simula um atraso de 2 segundos antes de navegar
-  Future.delayed(Duration(seconds: 2), () {
+  Future.delayed(const Duration(seconds: 2), () {
     Navigator.pop(context); // Fecha o diálogo de loading
     Navigator.pushNamed(context, routeName); // Navega para a próxima tela
   });

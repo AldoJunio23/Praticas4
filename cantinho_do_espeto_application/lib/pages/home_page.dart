@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_praticas/components/custom_drawer.dart';
-import 'package:flutter_application_praticas/pages/admin_page.dart';
 import 'package:flutter_application_praticas/pages/comandas_page.dart';
 import 'package:flutter_application_praticas/pages/cozinha_page.dart';
-import 'package:flutter_application_praticas/pages/crud_pages/deletar_page.dart';
 import 'package:flutter_application_praticas/pages/mesas_page.dart';
-import 'package:flutter_application_praticas/pages/selecao_pages/cardapio_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

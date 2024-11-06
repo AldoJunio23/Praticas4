@@ -97,7 +97,7 @@ class _CozinhaPage extends State<CozinhaPage> {
                       if (mesaSnapshot.connectionState == ConnectionState.waiting) {
                         return const CircularProgressIndicator();
                       } else if (mesaSnapshot.hasError) {
-                        return Text('Erro ao carregar mesa');
+                        return const Text('Erro ao carregar mesa');
                       } else if (!mesaSnapshot.hasData) {
                         return const Text('Mesa desconhecida');
                       }
@@ -221,10 +221,10 @@ class _CozinhaPage extends State<CozinhaPage> {
                               if (!pedido['finalizado']) 
                                 ElevatedButton(
                                   onPressed: () => _finalizarPedido(pedido['id'], context),
-                                  child: const Text('Finalizar Pedido'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.red, // Cor do botão
                                   ),
+                                  child: const Text('Finalizar Pedido'),
                                 ),
                             ],
                           ),

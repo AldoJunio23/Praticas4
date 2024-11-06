@@ -205,19 +205,19 @@ class _AlterarProdutoState extends State<AlterarProduto> {
                         decoration: const InputDecoration(
                           labelText: "Nome do produto",
                           focusColor: Colors.white,
-                          labelStyle: const TextStyle(
+                          labelStyle: TextStyle(
                             color: Colors.white,
                             
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
+                            borderSide: BorderSide(
                               color: Colors.white, // Cor da borda quando o campo está habilitado
                               width: 2,
                               style: BorderStyle.solid,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
+                            borderSide: BorderSide(
                               color: Colors.white, // Cor da borda quando o campo está focado
                               width: 2,
                               style: BorderStyle.solid,
@@ -225,7 +225,7 @@ class _AlterarProdutoState extends State<AlterarProduto> {
                           ),
                           // Você pode adicionar também um border quando o campo está com erro, se desejar
                           errorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
+                            borderSide: BorderSide(
                               color: Colors.red, // Cor da borda quando há erro
                               width: 2,
                               style: BorderStyle.solid,
@@ -287,18 +287,18 @@ class _AlterarProdutoState extends State<AlterarProduto> {
                         decoration: const InputDecoration(
                           labelText: "Valor do Produto",
                           focusColor: Colors.white,
-                          labelStyle: const TextStyle(
+                          labelStyle: TextStyle(
                             color: Colors.white,
                           ),
                           enabledBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
+                            borderSide: BorderSide(
                               color: Colors.white, // Cor da borda quando o campo está habilitado
                               width: 2,
                               style: BorderStyle.solid,
                             ),
                           ),
                           focusedBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
+                            borderSide: BorderSide(
                               color: Colors.white, // Cor da borda quando o campo está focado
                               width: 2,
                               style: BorderStyle.solid,
@@ -306,7 +306,7 @@ class _AlterarProdutoState extends State<AlterarProduto> {
                           ),
                           // Você pode adicionar também um border quando o campo está com erro, se desejar
                           errorBorder: OutlineInputBorder(
-                            borderSide: const BorderSide(
+                            borderSide: BorderSide(
                               color: Colors.red, // Cor da borda quando há erro
                               width: 2,
                               style: BorderStyle.solid,
