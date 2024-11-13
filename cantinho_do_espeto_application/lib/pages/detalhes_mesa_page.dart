@@ -41,6 +41,21 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
     }
   }
 
+  void _navigateToNextPage() async {
+  final result = await Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => TelaAdicionarProdutosPedido( pedidoId: pedidoID)),
+  );
+
+  if (result == true) {
+    // Recarregue os dados ou chame uma função para atualizar
+    setState(() {
+      // Aqui você pode atualizar seu Stream ou consulta
+      _carregarDadosMesa();
+    });
+  }
+}
+
   // Método para buscar as informações da mesa no Firestore
   Future<void> _carregarDadosMesa() async {
     try {
@@ -341,13 +356,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                 children: [
                   ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TelaAdicionarProdutosPedido(
-                                    pedidoId: pedidoID,
-                                  )),
-                        );
+                        _navigateToNextPage();
                       },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.all(15),
