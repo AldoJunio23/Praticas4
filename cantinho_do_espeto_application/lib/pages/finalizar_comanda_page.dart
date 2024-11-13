@@ -112,7 +112,7 @@ class _FinalizarComandaPageState extends State<FinalizarComandaPage> {
             children: [
               Expanded(
                 child: ListView.builder(
-                  itemCount: produtosDisponiveis.length,
+                  itemCount: produtosSelecionados.length,
                   itemBuilder: (context, index) {
                     final produto = produtosDisponiveis[index];
                     final produtoId = produto['id'];

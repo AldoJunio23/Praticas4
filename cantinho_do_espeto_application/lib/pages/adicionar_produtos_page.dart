@@ -3,8 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TelaAdicionarProdutosPedido extends StatefulWidget {
   final String? pedidoId;
+  final DocumentReference? mesaReference;
 
-  const TelaAdicionarProdutosPedido({super.key, required this.pedidoId});
+  const TelaAdicionarProdutosPedido({super.key, required this.pedidoId, required this.mesaReference});
 
   @override
   _TelaAdicionarProdutosPedidoState createState() => _TelaAdicionarProdutosPedidoState();
@@ -111,6 +112,7 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
       await _firestore.collection('Pedidos').doc(widget.pedidoId).update({
         'valorTotal': totalComanda,
         'listaProdutos': produtosSelecionados,
+        'mesa': widget.mesaReference,
       });
       Navigator.pop(context, true);
     } catch (e) {

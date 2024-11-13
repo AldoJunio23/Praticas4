@@ -19,6 +19,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
   int? _numMesa; // Para a comanda da mesa
   List<Map<String, dynamic>> produtos = []; // Lista de produtos
   String? pedidoID;
+  DocumentReference? mesaRef;
 
   @override
   void initState() {
@@ -42,9 +43,10 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
   }
 
   void _navigateToNextPage() async {
+  
   final result = await Navigator.push(
     context,
-    MaterialPageRoute(builder: (context) => TelaAdicionarProdutosPedido( pedidoId: pedidoID)),
+    MaterialPageRoute(builder: (context) => TelaAdicionarProdutosPedido( pedidoId: pedidoID, mesaReference: mesaRef,)),
   );
 
   if (result == true) {
@@ -71,9 +73,9 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
         });
 
         // Busca o pedido associado à mesa
-        DocumentReference mesaRef = doc.reference;
+        mesaRef = doc.reference;
         Map<String, dynamic>? pedido =
-            await PedidoService().buscarPedidoPorMesa(mesaRef);
+            await PedidoService().buscarPedidoPorMesa(mesaRef!);
         pedidoID = pedido?['id'].toString();
 
         if (pedido != null) {

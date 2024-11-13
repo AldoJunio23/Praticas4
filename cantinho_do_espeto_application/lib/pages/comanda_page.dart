@@ -14,6 +14,7 @@ class _CriarPedidosState extends State<ComandaPage> {
   String? mesaSelecionada;
   List<String> todasMesas = [];
   bool isLoading = true;
+  DocumentReference? mesaReference;
   List<DocumentSnapshot>? pedidos;
 
   @override
@@ -44,14 +45,27 @@ class _CriarPedidosState extends State<ComandaPage> {
     for (var mesaRef in mesasRefs) {
       DocumentSnapshot mesaDoc = await mesaRef.get();
       var mesaData = mesaDoc.data() as Map<String, dynamic>?;
-      nomesMesas.add('Mesa: ${mesaData?['numMesa'] ?? 'sem nome'}');
+      nomesMesas.add('${mesaData?['numMesa'] ?? '0'}');
     }
     return nomesMesas;
   }
 
   Future<String> _criarPedido() async {
+    var querySnapshot = await FirebaseFirestore.instance
+        .collection('Mesas')
+        .where('numMesa', isEqualTo: int.parse(mesaSelecionada!)) 
+        .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        mesaReference = querySnapshot.docs.first.reference;
+        // Aqui você tem o DocumentReference do documento encontrado
+      } else {
+        // Nenhum documento encontrado
+        print('Documento não encontrado');
+      }
+
     DocumentReference novoPedidoRef = await FirebaseFirestore.instance.collection('Pedidos').add({
-      'mesa': mesaSelecionada,
+      'mesa': mesaReference,
       'dataCriacao': FieldValue.serverTimestamp(),
       'finalizado': false,
       'listaProdutos': [],
@@ -62,9 +76,22 @@ class _CriarPedidosState extends State<ComandaPage> {
 
   Future<void> _listarPedidosDaMesa() async {
     if (mesaSelecionada != null) {
+      var querySnapshot = await FirebaseFirestore.instance
+        .collection('Mesas')
+        .where('numMesa', isEqualTo: int.parse(mesaSelecionada!)) 
+        .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        mesaReference = querySnapshot.docs.first.reference;
+        // Aqui você tem o DocumentReference do documento encontrado
+      } else {
+        // Nenhum documento encontrado
+        print('Documento não encontrado');
+      }
+
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('Pedidos')
-          .where('mesa', isEqualTo: mesaSelecionada)
+          .where('mesa', isEqualTo: mesaReference)
           .get();
 
       setState(() {
@@ -166,7 +193,7 @@ class _CriarPedidosState extends State<ComandaPage> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => TelaAdicionarProdutosPedido(pedidoId: pedidoId),
+                                builder: (context) => TelaAdicionarProdutosPedido(pedidoId: pedidoId, mesaReference: mesaReference,),
                               ),
                             );
                           },
