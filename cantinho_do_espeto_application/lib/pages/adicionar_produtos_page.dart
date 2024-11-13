@@ -112,8 +112,7 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
         'valorTotal': totalComanda,
         'listaProdutos': produtosSelecionados,
       });
-
-      setState(() {});
+      Navigator.pop(context, true);
     } catch (e) {
       print('Erro ao adicionar produtos: $e');
     }

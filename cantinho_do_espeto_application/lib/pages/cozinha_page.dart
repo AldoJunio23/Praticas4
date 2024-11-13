@@ -18,7 +18,7 @@ class _CozinhaPageState extends State<CozinhaPage> {
   void initState() {
     super.initState();
     _pedidosStream = FirebaseFirestore.instance
-        .collection('pedidos')
+        .collection('Pedidos')
         .snapshots();
   }
 
