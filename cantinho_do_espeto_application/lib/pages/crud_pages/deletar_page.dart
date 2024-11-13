@@ -20,8 +20,8 @@ class _DeletarProdutoState extends State<DeletarProduto> {
 
   Future<List<Map<String, dynamic>>> _getAllProdutos() async {
     List<Map<String, dynamic>> allProdutos = [];
-    final collectionNames = ['prod-bebida', 'prod-espetos'];
-    final docNames = ['PoDiOnHmAULfo04IFIZy', 'r68ahS3Ck96LGZEVzZma'];
+    final collectionNames = ['prod-bebida', 'prod-espetos', 'prod-porcoes', 'prod-caldo', 'prod-adicional'];
+    final docNames = ['PoDiOnHmAULfo04IFIZy', 'r68ahS3Ck96LGZEVzZma', 'QftnnSomGsxfDhSmkhDQ', 'EI0XR8FLCNQJXJ0EbzHL', 'FFgYAgy1ACxpqOPfekEi'];
 
     for (int i = 0; i < collectionNames.length; i++) {
       QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore

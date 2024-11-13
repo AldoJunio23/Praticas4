@@ -83,6 +83,40 @@ class _CriarProdutoState extends State<CriarProduto> {
         });
       }
 
+      else if (_categoriaSelecionada == "Porções") {
+        await FirebaseFirestore.instance.collection('Produto').doc('QftnnSomGsxfDhSmkhDQ').collection('prod-porcoes').add({
+          'nome': nome,
+          'valor': double.parse(valor),
+          'disponivel': true,
+          'imagem': urlImagem, // Adiciona a URL da imagem
+        });
+
+        
+      }
+
+      else if (_categoriaSelecionada == "Caldos") {
+        await FirebaseFirestore.instance.collection('Produto').doc('EI0XR8FLCNQJXJ0EbzHL').collection('prod-caldo').add({
+          'nome': nome,
+          'valor': double.parse(valor),
+          'disponivel': true,
+          'imagem': urlImagem, // Adiciona a URL da imagem
+        });
+
+        
+      }
+
+      else if (_categoriaSelecionada == "Adicionais") {
+        await FirebaseFirestore.instance.collection('Produto').doc('FFgYAgy1ACxpqOPfekEi').collection('prod-adicional').add({
+          'nome': nome,
+          'valor': double.parse(valor),
+          'disponivel': true,
+          'imagem': urlImagem, // Adiciona a URL da imagem
+        });
+
+        
+      }
+
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Produto criado com sucesso!'),
