@@ -1,222 +1,296 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_praticas/components/custom_drawer.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class TelaCardapio extends StatefulWidget {
+  const TelaCardapio({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: TelaCardapio(),
-    );
-  }
+  _TelaCardapioState createState() => _TelaCardapioState();
 }
 
-class TelaCardapio extends StatelessWidget {
-  const TelaCardapio({super.key});
+class _TelaCardapioState extends State<TelaCardapio> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ScrollController _scrollController = ScrollController();
+  final Map<String, GlobalKey> _categoryKeys = {};
+
+  final Map<String, Map<String, String>> categorias = {
+    'Caldos': {
+      'docId': 'EI0XR8FLCNQJXJ0EbzHL',
+      'collection': 'prod-caldo',
+    },
+    'Bebidas': {
+      'docId': 'PoDiOnHmAULfo04IFIZy',
+      'collection': 'prod-bebida',
+    },
+    'Espetos': {
+      'docId': 'r68ahS3Ck96LGZEVzZma',
+      'collection': 'prod-espetos',
+    },
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    for (var categoria in categorias.keys) {
+      _categoryKeys[categoria] = GlobalKey();
+    }
+  }
+
+  Future<Map<String, List<Map<String, dynamic>>>> _getAllProdutos() async {
+    Map<String, List<Map<String, dynamic>>> produtosPorCategoria = {};
+
+    for (var category in categorias.keys) {
+      final docId = categorias[category]?['docId'] ?? '';
+      final collectionName = categorias[category]?['collection'] ?? '';
+
+      List<Map<String, dynamic>> produtos = [];
+      QuerySnapshot<Map<String, dynamic>> snapshot = await _firestore
+          .collection("Produto")
+          .doc(docId)
+          .collection(collectionName)
+          .get();
+
+      for (var doc in snapshot.docs) {
+        if (doc['disponivel'] == true) {
+          produtos.add({
+            'id': doc.id,
+            'nome': doc['nome'],
+            'valor': doc['valor'],
+            'imagem': doc['imagem'],
+          });
+        }
+      }
+
+      produtosPorCategoria[category] = produtos;
+    }
+
+    return produtosPorCategoria;
+  }
+
+  void _scrollToCategory(String category) {
+    final categoryKey = _categoryKeys[category];
+    if (categoryKey != null) {
+      Scrollable.ensureVisible(
+        categoryKey.currentContext!,
+        duration: const Duration(seconds: 1),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Cardápio"),
-        backgroundColor: Colors.grey,
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: <Widget>[
-            DrawerHeader(
-              decoration: const BoxDecoration(color: Colors.orange),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Expanded(
-                    child: Text(
-                      "Menu",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white, fontSize: 24),
-                    ),
-                  ),
-                  Builder(
-                    builder: (context) {
-                      return IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      );
-                    },
-                  ),
+      drawer: const CustomDrawer(),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60.0),
+        child: AppBar(
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.orange[900]!.withOpacity(1),
+                  Colors.orange[900]!.withOpacity(0.9),
                 ],
+                stops: const [0.6, 1],
+              ),
+              border: const Border(
+                bottom: BorderSide(
+                  color: Colors.white,
+                  width: 1,
+                ),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.home), // home
-              title: const Text('Início - Cardápio'), // Início
-              onTap: () {
-                // navega para a tela de entrada
-                Navigator.pop(context);
-              },
+          ),
+          title: const Text(
+            'Cardápio',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
-            ListTile(
-              leading: const Icon(Icons.restaurant_menu), // home
-              title: const Text('Entrada'), // Início
-              onTap: () {
-                // navega para a tela de entrada
-                //Navigator.pushNamed(context, 'entrada');
-
-                // navega para a tela de entrada
-                _showLoadingThenNavigate(context, 'entrada');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.dinner_dining),
-              title: const Text('Prato Principal'),
-              onTap: () {
-                // navega para a tela de prato principal
-                //Navigator.pushNamed(context, 'prato principal');
-
-                // navega para a tela de prato principal
-                _showLoadingThenNavigate(context, 'prato principal');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.cake),
-              title: const Text('Sobremesa'),
-              onTap: () {
-                // navega para a tela de sobremesa
-                //Navigator.pushNamed(context, 'sobremesa');
-
-                // navega para a tela de sobremesa
-                _showLoadingThenNavigate(context, 'sobremesa');
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.wine_bar),
-              title: const Text('Bebida'),
-              onTap: () {
-                // navega para a tela de bebida
-                //Navigator.pushNamed(context, 'bebida');
-
-                // navega para a tela de bebida
-                _showLoadingThenNavigate(context, 'bebida');
-              },
-            ),
-            const SizedBox(height: 20), // espaço entre os demais itens da lista
-            ListTile(
-              leading: const Icon(Icons.exit_to_app),
-              title: const Text('Sair'),
-              onTap: () {
-                // ação
-              },
-            ),
-          ],
+          ),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              );
+            },
+          ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Botão Entrada
-            _buildCardButton(context, "Entrada"),
+      body: Column(
+        children: [
+          SizedBox(
+            height: 80,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: categorias.keys.map((category) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.orange[900],
+                        backgroundColor: Colors.white,
+                        elevation: 3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          side: BorderSide(color: Colors.orange[900]!),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 12.0,
+                          horizontal: 20.0,
+                        ),
+                      ),
+                      onPressed: () => _scrollToCategory(category),
+                      child: Text(
+                        category,
+                        style: const TextStyle(fontWeight: FontWeight.bold,
+                        fontSize: 16
+                         ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<Map<String, List<Map<String, dynamic>>>>(
+              future: _getAllProdutos(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('Erro ao carregar produtos'));
+                }
 
-            const SizedBox(height: 16.0),
+                final produtosPorCategoria = snapshot.data ?? {};
 
-            // Botão Prato Principal
-            _buildCardButton(context, "Prato Principal"),
+                return ListView.builder(
+                  controller: _scrollController,
+                  itemCount: produtosPorCategoria.keys.length,
+                  itemBuilder: (context, index) {
+                    final category = produtosPorCategoria.keys.elementAt(index);
+                    final produtos = produtosPorCategoria[category] ?? [];
 
-            const SizedBox(height: 16.0),
-
-            // Botão Sobremesa
-            _buildCardButton(context, "Sobremesa"),
-
-            const SizedBox(height: 16.0),
-
-            // Botão Bebida
-            _buildCardButton(context, "Bebida"),
-
-            const SizedBox(height: 50.0),
-
-            // Botão Finalizar
-            _buildFinalizeButton(context),
-          ],
-        ),
+                    return Column(
+                      key: _categoryKeys[category],
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Text(
+                            category,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromARGB(255, 255, 115, 0),
+                            ),
+                          ),
+                        ),
+                        Column(
+                          children: produtos.map((produto) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0,
+                                vertical: 8.0,
+                              ),
+                              child: Card(
+                                elevation: 10,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(
+                                        top: Radius.circular(15),
+                                      ),
+                                      child: CachedNetworkImage(
+                                        imageUrl: produto['imagem'],
+                                        placeholder: (context, url) =>
+                                            const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                        width: double.infinity,
+                                        height: 200,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              produto['nome'],
+                                              style: const TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.orange[900],
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Text(
+                                              'R\$ ${produto['valor'].toStringAsFixed(2)}',
+                                              style: const TextStyle(
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Icon(
+                                            Icons.fastfood,
+                                            color: Colors.orange,
+                                            size: 28,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
-}
-
-// Função para exibir loading antes de navegar para uma nova tela
-void _showLoadingThenNavigate(BuildContext context, String routeName) {
-  showDialog(
-    context: context,
-    barrierDismissible: false, // Evita fechar o loading clicando fora
-    builder: (BuildContext context) {
-      return const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize
-              .min, // Para que o tamanho do dialog se ajuste ao conteúdo
-          children: [
-            CircularProgressIndicator(), // Indicador de loading
-            SizedBox(height: 16), // Espaçamento entre o indicador e o texto
-            Text(
-              "LOADING...",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
-
-  // Simula um atraso de 2 segundos antes de navegar
-  Future.delayed(const Duration(seconds: 2), () {
-    Navigator.pop(context); // Fecha o diálogo de loading
-    Navigator.pushNamed(context, routeName); // Navega para a próxima tela
-  });
-}
-
-// Função dos botões laranjas
-Widget _buildCardButton(BuildContext context, String text) {
-  return SizedBox(
-    width: double.infinity,
-    height: 80, // altura dos botões
-    child: ElevatedButton(
-      onPressed: () {
-        // ação
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.orange, // cor de fundo dos botões
-        foregroundColor: Colors.white, // cor do texto dos botões
-        textStyle: const TextStyle(fontSize: 18), // tamanho de fonte
-      ),
-      child: Text(text),
-    ),
-  );
-}
-
-// Função para botão 'Finalizar'
-Widget _buildFinalizeButton(BuildContext context) {
-  return SizedBox(
-    width: double.infinity,
-    height: 60,
-    child: ElevatedButton(
-        onPressed: () {
-          // ação
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.green,
-          foregroundColor: Colors.white,
-          textStyle: const TextStyle(
-            fontSize: 18,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        child: const Text("Finalizar")),
-  );
 }

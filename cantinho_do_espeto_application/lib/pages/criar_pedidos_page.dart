@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_application_praticas/components/custom_drawer.dart';
 import 'package:flutter_application_praticas/pages/adicionar_produtos_page.dart';
 
 class CriarPedidosPage extends StatefulWidget {
@@ -95,25 +96,41 @@ class _CriarPedidosState extends State<CriarPedidosPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: const CustomDrawer(), // Usando o CustomDrawer
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60.0),
         child: AppBar(
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topLeft,
+                begin: Alignment.centerLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Colors.orange[900]!.withOpacity(0.8),
-                  Colors.orange[700]!.withOpacity(0.8),
-                  Colors.orange[500]!.withOpacity(0.8),
+                  Colors.orange[900]!.withOpacity(1),
+                  Colors.orange[900]!.withOpacity(0.9),
                 ],
-                stops: const [0.0, 0.5, 1.0],
+                stops: const [0.6, 1],
+              ),
+              border: const Border(
+                bottom: BorderSide(
+                  color: Colors.white,
+                  width: 1,
+                ),
               ),
             ),
           ),
-          title: const Text('Comandas'),
-          leading: const Icon(Icons.menu),
+          title: const Text('Criar Pedidos', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+              );
+            },
+          ),
         ),
       ),
       body: isLoading
@@ -199,10 +216,6 @@ class _CriarPedidosState extends State<CriarPedidosPage> {
                                   return Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                    children: [
-                                      Text(
-                                    'Pedido ID: ${pedidos![index].id}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
-                                  ),
                                   Text(
                                     'Valor Total: R\$ ${pedido['valorTotal'].toStringAsFixed(2)}',
                                     style: const TextStyle(fontWeight: FontWeight.bold),

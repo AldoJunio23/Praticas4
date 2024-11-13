@@ -39,7 +39,8 @@ class TelaMesasState extends State<TelaMesas> {
               ),
             ),
           ),
-          title: const Text('Mesas', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+          title: const Text('Mesas', style: TextStyle(color: Colors.white, 
+          fontSize: 22, fontWeight: FontWeight.bold)),
           leading: Builder(
             builder: (BuildContext context) {
               return IconButton(

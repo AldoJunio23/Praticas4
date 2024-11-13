@@ -177,7 +177,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                     RadioListTile<int>(
                       title: const Text(
                         'Ocupado',
-                        style: TextStyle(color: Colors.orange, fontSize: 20),
+                        style: TextStyle(color:Color.fromARGB(255, 134, 67, 15), fontSize: 20),
                       ),
                       value: 1,
                       groupValue: _selectedValue,
@@ -214,7 +214,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                     RadioListTile<int>(
                       title: const Text(
                         'Desocupado',
-                        style: TextStyle(color: Colors.orange, fontSize: 20),
+                        style: TextStyle(color: Color.fromARGB(255, 134, 67, 15), fontSize: 20),
                       ),
                       value: 2,
                       groupValue: _selectedValue,
@@ -361,11 +361,11 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                           ? const Icon(
                               Icons.brush,
                               size: 32,
-                              color: Colors.orange,
+                              color: Color.fromARGB(255, 134, 67, 15),
                             )
                           : const Text("Adicionar Produtos",
                               style: TextStyle(
-                                  fontSize: 24, color: Colors.orange))),
+                                  fontSize: 24, color: Color.fromARGB(255, 134, 67, 15)))),
                   produtos.isNotEmpty
                       ? const SizedBox(width: 68)
                       : const Text(""),
@@ -390,7 +390,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                           ),
                           child: const Text(
                             "Finalizar Comanda",
-                            style: TextStyle(fontSize: 24, color: Colors.white),
+                            style: TextStyle(fontSize: 24, color: Color.fromARGB(255, 134, 67, 15)),
                           ),
                         )
                       : const Text(""),
