@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_praticas/components/custom_drawer.dart';
-import 'package:flutter_application_praticas/pages/comandas_page.dart';
+import 'package:flutter_application_praticas/notUsable/comandas_page.dart';
+import 'package:flutter_application_praticas/pages/comanda_page.dart';
 import 'package:flutter_application_praticas/pages/cozinha_page.dart';
 import 'package:flutter_application_praticas/pages/mesas_page.dart';
 
@@ -123,7 +124,7 @@ class HomePageState extends State<HomePage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const TelaComandas(),
+                              builder: (context) => const ComandaPage(),
                             ),
                           );
                         },

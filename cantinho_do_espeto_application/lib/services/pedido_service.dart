@@ -60,12 +60,12 @@ class PedidoService {
   // Finaliza um pedido
   Future<void> finalizarPedido(String pedidoId) async {
     try {
-      await _firestore.collection('Pedidos').doc(pedidoId).update({
-        'finalizado': true,
-      });
-      print('Pedido finalizado com sucesso!');
+      await FirebaseFirestore.instance
+          .collection('Pedidos')
+          .doc(pedidoId)
+          .update({'finalizado': true }); // Muda o status para finalizado
     } catch (e) {
-      print("Erro ao finalizar pedido: $e");
+      throw Exception('Erro ao atualizar pedido: $e');
     }
   }
 

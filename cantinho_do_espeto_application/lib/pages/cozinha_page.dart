@@ -18,7 +18,7 @@ class _CozinhaPageState extends State<CozinhaPage> {
   void initState() {
     super.initState();
     _pedidosStream = FirebaseFirestore.instance
-        .collection('pedidos')
+        .collection('Pedidos')
         .snapshots();
   }
 
@@ -121,7 +121,14 @@ class _CozinhaPageState extends State<CozinhaPage> {
           itemCount: snapshot.data!.docs.length,
           itemBuilder: (context, index) {
             final pedido = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+            final List<dynamic> produtosRefs = pedido['listaProdutos'] ?? [];
+            
+            if (produtosRefs.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
             return _buildPedidoCard(pedido, snapshot.data!.docs[index].id);
+            
           },
         );
       },
@@ -336,4 +343,6 @@ class _CozinhaPageState extends State<CozinhaPage> {
     }
     return produtos;
   }
+
+  
 }

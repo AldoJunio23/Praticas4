@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_application_praticas/components/custom_drawer.dart';
-import 'package:flutter_application_praticas/pages/criar_pedidos_page.dart';
 
 
 class TelaComandas extends StatefulWidget {
@@ -78,10 +77,11 @@ class _TelaComandasState extends State<TelaComandas>
             ElevatedButton(
 
               onPressed: (){
-                  Navigator.push(
+                  /*Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const CriarPedidosPage()),
-                  );
+              MaterialPageRoute(builder: (context) => const CrarPedidosPage()),
+                  );*/
+                  print('fé');
               },
 
               style: ElevatedButton.styleFrom(

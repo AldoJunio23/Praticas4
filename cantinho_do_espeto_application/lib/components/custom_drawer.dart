@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_praticas/pages/crud_pages/deletar_page.dart';
 import 'package:flutter_application_praticas/pages/home_page.dart';
-import 'package:flutter_application_praticas/pages/selecao_pages/cardapio_page.dart';
+import 'package:flutter_application_praticas/pages/cardapio_page.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
