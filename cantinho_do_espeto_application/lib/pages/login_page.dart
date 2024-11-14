@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_praticas/pages/esquecisenha_page.dart';
 import 'package:flutter_application_praticas/pages/home_page.dart';
 import 'package:flutter_application_praticas/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -11,6 +12,7 @@ class LoginPage extends StatefulWidget {
 }
 
 class LoginPageState extends State<LoginPage> {
+    
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -24,15 +26,17 @@ class LoginPageState extends State<LoginPage> {
 
     String email = _emailController.text.trim();
     String password = _passwordController.text.trim();
-
+    final prefs = await SharedPreferences.getInstance();
+    
     try {
       final user = await _authService.login(
         email: email,
-        senha: password,
+        senha: password,    
       );
 
       if (user != null) {
         print("Login bem-sucedido!");
+        prefs.setString('email', email);
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

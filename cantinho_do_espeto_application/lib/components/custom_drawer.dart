@@ -1,18 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_praticas/pages/crud_pages/deletar_page.dart';
+import 'package:flutter_application_praticas/pages/comanda_page.dart';
+import 'package:flutter_application_praticas/pages/cozinha_page.dart';
+import 'package:flutter_application_praticas/pages/crud_pages/adm_page.dart';
+import 'package:flutter_application_praticas/pages/faturamente_page.dart';
 import 'package:flutter_application_praticas/pages/home_page.dart';
 import 'package:flutter_application_praticas/pages/cardapio_page.dart';
+import 'package:flutter_application_praticas/pages/login_page.dart';
+import 'package:flutter_application_praticas/pages/mesas_page.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
 
+  
+  Future<bool> _isAdmin() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    if (prefs.getString('email') == 'aldinho2307@gmail.com'){
+      return true;
+    }
+    return false;
+  }
+
+  Future _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+     prefs.setString('email', "");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
-
-      
       child: Column(
-        
         children: <Widget>[
           // Mantendo o gradiente do container como estava
           Container(
@@ -64,11 +83,49 @@ class CustomDrawer extends StatelessWidget {
               );
             },
           ),
+              
           ListTile(
-            leading: const Icon(Icons.book),
-            title: const Text('Histórico'),
-            onTap: () {},
+            leading: const Icon(Icons.table_restaurant),
+            title: const Text('Mesas'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => TelaMesas(),
+                ),
+              );
+            },
           ),
+
+          ListTile(
+            leading: const Icon(Icons.receipt_long),
+            title: const Text('Comandas'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ComandaPage(),
+                ),
+              );
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.restaurant),
+            title: const Text('Cozinha'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CozinhaPage(),
+                ),
+              );
+            },
+          ),
+
           ListTile(
             leading: const Icon(Icons.restaurant_menu),
             title: const Text('Cardápio'),
@@ -85,29 +142,71 @@ class CustomDrawer extends StatelessWidget {
           
           // Espaçamento flexível
           const Spacer(),
-
-          // ListTiles do Admin e Sair no final
+          
           Column(
             children: [
-              ListTile(
-                leading: const Icon(Icons.lock_person),
-                title: const Text('Admin'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const DeletarProduto(),
-                    ),
+              FutureBuilder<bool>(
+            future: _isAdmin(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox.shrink(); // Placeholder enquanto carrega
+              } else if (snapshot.hasData && snapshot.data == true) {
+                return ListTile(
+                      leading: const Icon(Icons.book),
+                      title: const Text('Histórico'),
+                      onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const FaturamentoDiarioPage(),
+                        ),
+                      );
+                    },
                   );
-                },
-              ),
+              } else {
+                return const SizedBox.shrink(); // Não mostra nada se não for admin
+              }
+            },
+          ),
+
+            FutureBuilder<bool>(
+            future: _isAdmin(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SizedBox.shrink(); // Placeholder enquanto carrega
+              } else if (snapshot.hasData && snapshot.data == true) {
+                return ListTile(
+                  leading: const Icon(Icons.lock_person),
+                  title: const Text('Admin'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AdminPage(),
+                      ),
+                    );
+                  },
+                );
+              } else {
+                return const SizedBox.shrink(); // Não mostra nada se não for admin
+              }
+            },
+          ),
               ListTile(
                 leading: const Icon(Icons.exit_to_app),
                 title: const Text('Sair'),
-                onTap: () {
-                  // ação de sair
-                },
+                onTap: ()  {
+                    _logout();
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  },
               ),
             ],
           ),

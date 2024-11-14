@@ -16,6 +16,9 @@ dependencies:
   dropdown_search: ^6.0.1
   google_fonts: ^5.0.0
   cached_network_image: ^3.2.1
+  shared_preferences: ^2.0.18
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:

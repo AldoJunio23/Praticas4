@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import necessário para FilteringTextInputFormatter
+import 'package:flutter/services.dart';
 
 class AlterarProduto extends StatefulWidget {
-  final String idProduto; // Adicionando idProduto como um parâmetro
+  final String idProduto;
   final String subCategoria;
   final String docName;
 
@@ -14,29 +14,27 @@ class AlterarProduto extends StatefulWidget {
 }
 
 class _AlterarProdutoState extends State<AlterarProduto> {
-  // Controladores para os campos de texto
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _valorController = TextEditingController();
-  String? _categoriaSelecionada; // Para o Dropdown de categorias
+  String? _categoriaSelecionada;
   List<String> _subprodutos = [];
 
   @override
   void initState() {
     super.initState();
-    _carregarSubprodutos(); // Carrega subprodutos ao iniciar
-    _carregarProduto(); // Carrega os dados do produto a ser editado
+    _carregarSubprodutos();
+    _carregarProduto();
   }
 
   Future<void> _carregarSubprodutos() async {
     try {
       final QuerySnapshot result = await FirebaseFirestore.instance
-          .collection('Produto') // Nome da coleção
+          .collection('Produto')
           .get();
       setState(() {
-        _subprodutos = result.docs.map((doc) => doc['categoria'] as String).toList(); // 'categoria' é o campo que contém o subproduto
+        _subprodutos = result.docs.map((doc) => doc['categoria'] as String).toList();
       });
     } catch (e) {
-      // Tratamento de erro, caso algo dê errado
       print('Erro ao carregar subprodutos: $e');
     }
   }
@@ -47,10 +45,10 @@ class _AlterarProdutoState extends State<AlterarProduto> {
           .collection('Produto')
           .doc(widget.docName)
           .collection(widget.subCategoria)
-          .doc(widget.idProduto) // Usando o id do produto passado
+          .doc(widget.idProduto)
           .get();
 
-       DocumentSnapshot categoria = await FirebaseFirestore.instance
+      DocumentSnapshot categoria = await FirebaseFirestore.instance
           .collection('Produto')
           .doc(widget.docName)
           .get();
@@ -59,24 +57,18 @@ class _AlterarProdutoState extends State<AlterarProduto> {
         _nomeController.text = doc['nome'];
         _valorController.text = doc['valor'].toString();
         _categoriaSelecionada = categoria['categoria'];
-        setState(() {
-          
-        });
+        setState(() {});
       }
     } catch (e) {
       print('Erro ao carregar produto: $e');
     }
   }
 
-  // Função de validação dos campos
   void _validarCampos() {
     String nomeProduto = _nomeController.text.trim();
     String precoProduto = _valorController.text.trim();
 
-    if (nomeProduto.isEmpty ||
-        precoProduto.isEmpty ||
-        _categoriaSelecionada == null) {
-      // Exibe um alerta informando que os campos estão vazios
+    if (nomeProduto.isEmpty || precoProduto.isEmpty || _categoriaSelecionada == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Preencha os campos antes de continuar!'),
@@ -84,7 +76,6 @@ class _AlterarProdutoState extends State<AlterarProduto> {
         ),
       );
     } else if (!_precoValido(precoProduto)) {
-      // Se o preço contiver caracteres inválidos, exibe um alerta
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Preço inválido! Por favor, insira apenas números.'),
@@ -92,14 +83,12 @@ class _AlterarProdutoState extends State<AlterarProduto> {
         ),
       );
     } else {
-      _atualizarProduto(nomeProduto, precoProduto); // Chama função para atualizar o produto
+      _atualizarProduto(nomeProduto, precoProduto);
     }
   }
 
-  // Função para validar se o preço contém apenas números
   bool _precoValido(String preco) {
-    // Verifica se o preço contém apenas números
-    final RegExp regExp = RegExp(r'^[0-9]+(\.[0-9]+)?$'); // Aceita valores decimais
+    final RegExp regExp = RegExp(r'^[0-9]+(\.[0-9]+)?$');
     return regExp.hasMatch(preco);
   }
 
@@ -118,15 +107,13 @@ class _AlterarProdutoState extends State<AlterarProduto> {
         ),
       );
 
-      // Limpa os campos após a atualização
       _nomeController.clear();
       _valorController.clear();
       setState(() {
-        _categoriaSelecionada = null; // Limpar a seleção da categoria
+        _categoriaSelecionada = null;
       });
 
-      // Volta para a página anterior
-      Navigator.pop(context); // Retorna para a página anterior
+      Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -139,254 +126,95 @@ class _AlterarProdutoState extends State<AlterarProduto> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60.0),
-        child: AppBar(
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.orange[900]!.withOpacity(1),
-                  Colors.orange[900]!.withOpacity(0.9),
-                ],
-                stops: const [0.6, 1],
-              ),
-              border: const Border(
-                bottom: BorderSide(
-                  color: Colors.white,
-                  width: 1
-                )
-              )
-            ),
-          ),
-          title: const Text('Editar Produto', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-          leading: Builder(
-            builder: (BuildContext context) {
-              return const Icon(Icons.brush, color: Colors.white);
-            }
+      appBar: AppBar(
+        title: const Text('Editar Produto', style: TextStyle(color: Colors.white)),
+        flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.centerLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.orange[900]!.withOpacity(1),
+              Colors.orange[900]!.withOpacity(0.9),
+            ],
+            stops: const [0.6, 1],
           ),
         ),
       ),
+        elevation: 1,
+        leading: const Icon(Icons.brush, color: Colors.white),
+      ),
       body: Container(
-        padding: const EdgeInsets.symmetric(vertical: 30),
-        width: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            colors: [
-              Colors.orange[900]!,
-              Colors.orange[800]!,
-              Colors.orange[400]!,
-            ],
-          ),
-        ),
+        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+        color: Colors.white,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: Container(
-                  width: 750,
-                  height: 1250,
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TextField(
-                        style: const TextStyle(
-                          color: Colors.white
-                        ),
-                        controller: _nomeController,
-                        decoration: const InputDecoration(
-                          labelText: "Nome do produto",
-                          focusColor: Colors.white,
-                          labelStyle: TextStyle(
-                            color: Colors.white,
-                            
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white, // Cor da borda quando o campo está habilitado
-                              width: 2,
-                              style: BorderStyle.solid,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white, // Cor da borda quando o campo está focado
-                              width: 2,
-                              style: BorderStyle.solid,
-                            ),
-                          ),
-                          // Você pode adicionar também um border quando o campo está com erro, se desejar
-                          errorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.red, // Cor da borda quando há erro
-                              width: 2,
-                              style: BorderStyle.solid,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 25),
-                      Center(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.white, // Cor da borda
-                              width: 2, // Largura da borda
-                            ),
-                            borderRadius: BorderRadius.circular(5), // Arredondar bordas (opcional)
-                          ),
-                          child: DropdownButton<String>(
-                            hint: const Padding(
-                              padding: EdgeInsets.all(10),
-                              child: Text(
-                                "Selecione a Categoria", 
-                                style: TextStyle(
-                                  color: Colors.white
-                                ),
-                              )
-                            ),
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                            value: _categoriaSelecionada,
-                            icon: const Icon(Icons.keyboard_arrow_down, color: Colors.white,),
-                            isExpanded: true,
-                            underline: Container(
-                              height: 0, // Altura do underline
-                            ),
-                            padding: const EdgeInsets.only(left: 10),
-                            dropdownColor: Colors.orange[900],
-                            items: _subprodutos.map((String subproduto) {
-                              return DropdownMenuItem(
-                                value: subproduto,
-                                child: Text(subproduto)
-                              );
-                            }).toList(),
-                            onChanged: (String? novoValor) {
-                              _categoriaSelecionada = novoValor;
-                              setState(() {
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 25),
-                      TextField(
-                        style: const TextStyle(
-                          color: Colors.white
-                        ),
-                        controller: _valorController, // Renomeado para valor
-                        decoration: const InputDecoration(
-                          labelText: "Valor do Produto",
-                          focusColor: Colors.white,
-                          labelStyle: TextStyle(
-                            color: Colors.white,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white, // Cor da borda quando o campo está habilitado
-                              width: 2,
-                              style: BorderStyle.solid,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white, // Cor da borda quando o campo está focado
-                              width: 2,
-                              style: BorderStyle.solid,
-                            ),
-                          ),
-                          // Você pode adicionar também um border quando o campo está com erro, se desejar
-                          errorBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.red, // Cor da borda quando há erro
-                              width: 2,
-                              style: BorderStyle.solid,
-                            ),
-                          ),
-                        ),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: <TextInputFormatter>[
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                      ),
-                      const SizedBox(height: 25),
-                    ],
-                  ),
-                ),
+            TextField(
+              controller: _nomeController,
+              decoration: InputDecoration(
+                labelText: "Nome do produto",
+                border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 20),
+            DropdownButtonFormField<String>(
+              hint: const Text("Selecione a Categoria"),
+              value: _categoriaSelecionada,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+              ),
+              items: _subprodutos.map((String subproduto) {
+                return DropdownMenuItem(
+                  value: subproduto,
+                  child: Text(subproduto),
+                );
+              }).toList(),
+              onChanged: (String? novoValor) {
+                setState(() {
+                  _categoriaSelecionada = novoValor;
+                });
+              },
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _valorController,
+              decoration: InputDecoration(
+                labelText: "Valor do Produto",
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: <TextInputFormatter>[
+                FilteringTextInputFormatter.digitsOnly,
+              ],
+            ),
+            const SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton(
+                  onPressed: _validarCampos,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 20.0,
-                      horizontal: 40.0,
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
                   ),
-                  onPressed: () {
-                    _validarCampos();
-                  },
-                  child: const Text(
-                    'Criar',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  child: const Text("Confirmar", style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
-                const SizedBox(width: 20),
                 ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 20.0,
-                      horizontal: 40.0,
-                    ),
-                    textStyle: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
                   ),
-                  onPressed: () {
-                    Navigator.pop(context);// Use pop para voltar
-                  },
-                  child: const Text(
-                    "Voltar",
-                    style: TextStyle(fontSize: 16),
-                    textAlign: TextAlign.center,
-                  ),
+                  child: const Text("Voltar", style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
               ],
             ),
-            const SizedBox(height: 60),
           ],
         ),
-      )
+      ),
     );
   }
 }

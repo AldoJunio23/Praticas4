@@ -16,108 +16,166 @@ class TelaMesasState extends State<TelaMesas> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      drawer: const CustomDrawer(), // Usando o nosso CustomDrawer
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60.0),
-        child: AppBar(
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.orange[900]!.withOpacity(1),
-                  Colors.orange[900]!.withOpacity(0.9),
-                ],
-                stops: const [0.6, 1],
-              ),
-              border: const Border(
-                bottom: BorderSide(
-                  color: Colors.white,
-                  width: 1,
-                ),
-              ),
+      drawer: const CustomDrawer(),
+      appBar: AppBar(
+        title: const Text(
+          'Mesas',
+          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.orange[900]!.withOpacity(1), Colors.orange[900]!.withOpacity(0.9)],
+              stops: const [0.6, 1],
             ),
           ),
-          title: const Text('Mesas', style: TextStyle(color: Colors.white, 
-          fontSize: 22, fontWeight: FontWeight.bold)),
-          leading: Builder(
-            builder: (BuildContext context) {
-              return IconButton(
-                icon: const Icon(Icons.menu, color: Colors.white),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-              );
-            },
+        ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-      ), 
+      ),
       body: Container(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        height: double.infinity,
-        width: double.infinity,
-        color: Colors.white,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(30),
-          child: StreamBuilder<QuerySnapshot>(
-            stream: _firestore.collection('Mesas').snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+        ),
+        child: StreamBuilder<QuerySnapshot>(
+          stream: _firestore.collection('Mesas').snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.orange),
+                ),
+              );
+            }
 
-              if (snapshot.hasError) {
-                return const Center(child: Text('Erro ao carregar mesas.'));
-              }
+            if (snapshot.hasError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.error_outline, size: 60, color: Colors.red[300]),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Erro ao carregar mesas.',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                    TextButton(
+                      onPressed: () => setState(() {}),
+                      child: const Text('Tentar novamente'),
+                    ),
+                  ],
+                ),
+              );
+            }
 
-              final mesas = snapshot.data?.docs ?? [];
+            final mesas = snapshot.data?.docs ?? [];
 
-              return Wrap(
-                spacing: 25, // Espaço horizontal entre os botões
-                runSpacing: 25, // Espaço vertical entre as linhas de botões
-                children: List.generate(mesas.length, (index) {
-                  var mesa = mesas[index];
-                  var isOcupada = mesa['status'] ?? false; // Usar o campo 'status' para determinar a ocupação
+            if (mesas.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.table_bar, size: 60, color: Colors.grey[400]),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Nenhuma mesa cadastrada',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ],
+                ),
+              );
+            }
 
-                  Color buttonColor = isOcupada ? Colors.red : Colors.green;
+            return GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 1.0,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+              ),
+              itemCount: mesas.length,
+              itemBuilder: (context, index) {
+                var mesa = mesas[index];
+                var isOcupada = mesa['status'] ?? false;
 
-                  return ElevatedButton(
-                    onPressed: () {
-                      // Altera o estado da mesa no Firestore
+                return Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: InkWell(
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => TelaDetalhesMesas( mesaId: mesa.id,),
+                          builder: (context) => TelaDetalhesMesas(mesaId: mesa.id),
                         ),
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.all(25),
-                      backgroundColor: buttonColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(7.0),
+                    borderRadius: BorderRadius.circular(15),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: isOcupada
+                              ? [Colors.red[400]!, Colors.red[600]!]
+                              : [Colors.green[400]!, Colors.green[600]!],
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            isOcupada ? Icons.people : Icons.table_restaurant,
+                            size: 40,
+                            color: Colors.white,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Mesa ${mesa['numMesa']}',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              isOcupada ? "Ocupada" : "Disponível",
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    child: Column(
-                      children: [
-                        Text(
-                          'Mesa ${mesa['numMesa']}', // Exibir o número da mesa
-                          style: const TextStyle(fontSize: 20, color: Colors.white),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(isOcupada ? "Ocupada" : "Disponível", style: const TextStyle(color: Colors.white),)
-                      ],
-                    ),
-                  );
-                }),
-              );
-            },
-          ),
+                  ),
+                );
+              },
+            );
+          },
         ),
-      )
+      ),
     );
   }
-
 }

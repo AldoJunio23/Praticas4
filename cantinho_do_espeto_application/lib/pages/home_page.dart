@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_praticas/components/custom_drawer.dart';
-import 'package:flutter_application_praticas/notUsable/comandas_page.dart';
+import 'package:flutter_application_praticas/pages/cardapio_page.dart';
 import 'package:flutter_application_praticas/pages/comanda_page.dart';
 import 'package:flutter_application_praticas/pages/cozinha_page.dart';
 import 'package:flutter_application_praticas/pages/mesas_page.dart';
@@ -9,170 +9,173 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
   
   @override
-  HomePageState createState() => HomePageState(); 
+  HomePageState createState() => HomePageState();
 }
 
 class HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    // Pega o tamanho da tela para torná-la responsiva
-    double screenHeight = MediaQuery.of(context).size.height;
-    double screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
-      drawer: const CustomDrawer(), // Usando o CustomDrawer
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(60.0),
-        child: AppBar(
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Colors.orange[900]!.withOpacity(1),
-                  Colors.orange[900]!.withOpacity(0.9),
-                ],
-                stops: const [0.6, 1],
-              ),
-              border: const Border(
-                bottom: BorderSide(
-                  color: Colors.white,
-                  width: 1,
-                ),
-              ),
-            ),
-          ),
-          title: const Text('Home', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
-          leading: Builder(
-            builder: (BuildContext context) {
-              return IconButton(
-                icon: const Icon(Icons.menu, color: Colors.white),
-                onPressed: () {
-                  Scaffold.of(context).openDrawer();
-                },
-                tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-              );
-            },
-          ),
+      drawer: const CustomDrawer(),
+      appBar: AppBar(
+        title: const Text(
+          'Cantinho do Espeto',
+          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
-      ), 
-      body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 30),
-          width: double.infinity,
+        flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              colors: [
+              begin: Alignment.centerLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.orange[900]!.withOpacity(1),
+                Colors.orange[900]!.withOpacity(0.9)],
+              stops: const [0.6, 1],
+            ),
+          ),
+        ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
                 Colors.orange[900]!,
-                Colors.orange[800]!,
-                Colors.orange[400]!,
+                Colors.orange[600]!,
+              ],
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 20),
+                Center(
+                  
+                  child: Image.asset(
+                    'assets/logo.png',
+                    height: MediaQuery.of(context).size.height * 0.35,
+                  ),
+                ),
+                
+                const SizedBox(height: 30),
+                const Padding(
+                  padding: EdgeInsets.only(left: 8.0),
+                  child: Text(
+                    'Menu Principal',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                GridView.count(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  children: [
+                    _buildMenuCard(
+                      context: context,
+                      title: 'Mesas',
+                      icon: Icons.table_restaurant,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const TelaMesas()),
+                      ),
+                    ),
+                    _buildMenuCard(
+                      context: context,
+                      title: 'Comandas',
+                      icon: Icons.receipt_long,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const ComandaPage()),
+                      ),
+                    ),
+                    _buildMenuCard(
+                      context: context,
+                      title: 'Cozinha',
+                      icon: Icons.restaurant,
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const CozinhaPage()),
+                      ),
+                    ),
+                    _buildMenuCard(
+                      context: context,
+                      title: 'Cardápio',
+                      icon: Icons.restaurant_menu,
+                     onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const TelaCardapio()),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                
-                Center(
-                  child: Image.asset(
-                    'assets/logo.png',
-                    height: screenHeight * 0.35,
-                    width: screenWidth * 0.55,
-                  ),
-                ),
-                const SizedBox(height: 15 ),
-  
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 253, 255, 228),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const TelaMesas(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.3,
-                            vertical: screenHeight * 0.07,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(7.0),
-                          ),
-                          backgroundColor:  const Color.fromARGB(255, 230, 81, 0),
-                        ),
-                        child: const Text(
-                          "Mesas",
-                          style: TextStyle(fontSize: 24, color: Colors.white),
-                          
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const ComandaPage(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.25,
-                            vertical: screenHeight * 0.07,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(7.0),
-                          ),
-                          backgroundColor: const Color.fromARGB(255, 230, 81, 0),
-                        ),
-                        child: const Text(
-                          "Comandas",
-                          style: TextStyle(fontSize: 24, color: Colors.white),
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CozinhaPage(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.28,
-                            vertical: screenHeight * 0.07,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(7.0),
-                          ),
-                          backgroundColor:  const Color.fromARGB(255, 230, 81, 0),
-                        ),
-                        child: const Text(
-                          "Cozinha",
-                          style: TextStyle(fontSize: 24, color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMenuCard({
+    required BuildContext context,
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white,
+                Colors.orange[50]!,
               ],
             ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 40,
+                color: Colors.orange[800],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange[900],
+                ),
+              ),
+            ],
           ),
         ),
       ),

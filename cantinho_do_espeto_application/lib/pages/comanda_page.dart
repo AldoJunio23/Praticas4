@@ -23,6 +23,7 @@ class _CriarPedidosState extends State<ComandaPage> {
     _obterMesas();
   }
 
+  // Mantendo os métodos existentes inalterados...
   Future<void> _obterMesas() async {
     try {
       QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('Mesas').get();
@@ -53,16 +54,14 @@ class _CriarPedidosState extends State<ComandaPage> {
   Future<String> _criarPedido() async {
     var querySnapshot = await FirebaseFirestore.instance
         .collection('Mesas')
-        .where('numMesa', isEqualTo: int.parse(mesaSelecionada!)) 
+        .where('numMesa', isEqualTo: int.parse(mesaSelecionada!))
         .get();
 
-      if (querySnapshot.docs.isNotEmpty) {
-        mesaReference = querySnapshot.docs.first.reference;
-        // Aqui você tem o DocumentReference do documento encontrado
-      } else {
-        // Nenhum documento encontrado
-        print('Documento não encontrado');
-      }
+    if (querySnapshot.docs.isNotEmpty) {
+      mesaReference = querySnapshot.docs.first.reference;
+    } else {
+      print('Documento não encontrado');
+    }
 
     DocumentReference novoPedidoRef = await FirebaseFirestore.instance.collection('Pedidos').add({
       'mesa': mesaReference,
@@ -77,16 +76,12 @@ class _CriarPedidosState extends State<ComandaPage> {
   Future<void> _listarPedidosDaMesa() async {
     if (mesaSelecionada != null) {
       var querySnapshot = await FirebaseFirestore.instance
-        .collection('Mesas')
-        .where('numMesa', isEqualTo: int.parse(mesaSelecionada!)) 
-        .get();
+          .collection('Mesas')
+          .where('numMesa', isEqualTo: int.parse(mesaSelecionada!))
+          .get();
 
       if (querySnapshot.docs.isNotEmpty) {
         mesaReference = querySnapshot.docs.first.reference;
-        // Aqui você tem o DocumentReference do documento encontrado
-      } else {
-        // Nenhum documento encontrado
-        print('Documento não encontrado');
       }
 
       QuerySnapshot snapshot = await FirebaseFirestore.instance
@@ -109,102 +104,230 @@ class _CriarPedidosState extends State<ComandaPage> {
     return produtos;
   }
 
+  Widget _buildProdutoCard(Map<String, dynamic> produto) {
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        title: Text(
+          produto['nome'],
+          style: const TextStyle(fontWeight: FontWeight.w500),
+        ),
+        subtitle: Text(
+          'R\$ ${produto['valor']?.toStringAsFixed(2) ?? '0.00'}',
+          style: TextStyle(
+            color: Colors.orange[900],
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        trailing: IconButton(
+          icon: Icon(Icons.edit, color: Colors.orange[900]),
+          onPressed: () {
+            // Implementar ação de edição
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPedidoCard(Map<String, dynamic> pedido, List<Map<String, dynamic>> produtos) {
+    return Card(
+      elevation: 4,
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Valor Total:',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[700],
+                  ),
+                ),
+                Text(
+                  'R\$ ${pedido['valorTotal'].toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.orange[900],
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            const Text(
+              'Produtos:',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...produtos.map((produto) => _buildProdutoCard(produto)),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       drawer: const CustomDrawer(),
       appBar: AppBar(
+        elevation: 0,
         title: const Text(
           'Comandas',
-          style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              begin: Alignment.centerLeft,
+              begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Colors.orange[900]!.withOpacity(1), Colors.orange[900]!.withOpacity(0.9)],
-              stops: const [0.6, 1],
+              colors: [
+                Colors.orange[900]!,
+                Colors.orange[800]!,
+              ],
             ),
           ),
         ),
         leading: Builder(
           builder: (context) => IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
+            icon: const Icon(Icons.menu, color: Colors.white, size: 28),
             onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
       ),
-      body: Center(
-        child: isLoading
-            ? const CircularProgressIndicator()
-            : Padding(
+      body: isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+                color: Colors.orange[900],
+              ),
+            )
+          : Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+              ),
+              child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    const Text(
-                      'Selecione uma mesa:', 
-                      textAlign: TextAlign.center,
-                      style: TextStyle( fontSize: 24),
-                      
+                    Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    const SizedBox(height: 10),
-                    Container(
-                      width: 250,  // Definindo largura maior para o Dropdown
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: DropdownButton<String>(
-                        hint: const Text('Escolha uma mesa'),
-                        value: mesaSelecionada,
-                        isExpanded: true,
-                        underline: const SizedBox(),
-                        onChanged: (novaMesa) {
-                          setState(() {
-                            mesaSelecionada = novaMesa;
-                          });
-                          _listarPedidosDaMesa();
-                        },
-                        items: todasMesas
-                            .map((mesa) => DropdownMenuItem<String>(
-                                  value: mesa,
-                                  child: Text(mesa),
-                                ))
-                            .toList(),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          children: [
+                            const Text(
+                              'Selecione uma mesa',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey[300]!),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  hint: const Text('Escolha uma mesa'),
+                                  value: mesaSelecionada,
+                                  isExpanded: true,
+                                  icon: Icon(Icons.arrow_drop_down, color: Colors.orange[900]),
+                                  onChanged: (novaMesa) {
+                                    setState(() {
+                                      mesaSelecionada = novaMesa;
+                                    });
+                                    _listarPedidosDaMesa();
+                                  },
+                                  items: todasMesas
+                                      .map((mesa) => DropdownMenuItem<String>(
+                                            value: mesa,
+                                            child: Text(
+                                              'Mesa $mesa',
+                                              style: const TextStyle(fontSize: 16),
+                                            ),
+                                          ))
+                                      .toList(),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 20),
                     if (mesaSelecionada != null) ...[
-                      const Text('Adicionar Produtos:', textAlign: TextAlign.center),
-                      const SizedBox(height: 10),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.add, color: Colors.black),
-                          onPressed: () async {
-                            String pedidoId = await _criarPedido();
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TelaAdicionarProdutosPedido(pedidoId: pedidoId, mesaReference: mesaReference,),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          String pedidoId = await _criarPedido();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TelaAdicionarProdutosPedido(
+                                pedidoId: pedidoId,
+                                mesaReference: mesaReference,
                               ),
-                            );
-                          },
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange[900],
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
+                        label: const Text(
+                          'Adicionar Produtos',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      const Text('Pedidos da Mesa:', textAlign: TextAlign.center),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Pedidos da Mesa',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       Expanded(
                         child: pedidos == null
-                            ? const Text('Nenhum pedido encontrado.', textAlign: TextAlign.center)
+                            ? Center(
+                                child: Text(
+                                  'Nenhum pedido encontrado.',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              )
                             : ListView.builder(
                                 itemCount: pedidos!.length,
                                 itemBuilder: (context, index) {
@@ -216,40 +339,13 @@ class _CriarPedidosState extends State<ComandaPage> {
                                     future: _obterListaProdutos(listaProdutosRefs),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState == ConnectionState.waiting) {
-                                        return const CircularProgressIndicator();
+                                        return const Center(
+                                          child: CircularProgressIndicator(),
+                                        );
                                       }
 
                                       var produtos = snapshot.data ?? [];
-                                      return Card(
-                                        margin: const EdgeInsets.symmetric(vertical: 10),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(10),
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'Valor Total: R\$ ${pedido['valorTotal'].toStringAsFixed(2)}',
-                                                style: const TextStyle(fontWeight: FontWeight.bold),
-                                              ),
-                                              const SizedBox(height: 10),
-                                              const Text('Produtos:', style: TextStyle(fontWeight: FontWeight.bold)),
-                                              const SizedBox(height: 10),
-                                              ...produtos.map((produto) => ListTile(
-                                                    title: Text(produto['nome']),
-                                                    subtitle: Text(
-                                                      'Valor: R\$ ${produto['valor']?.toStringAsFixed(2) ?? '0.00'}',
-                                                    ),
-                                                    trailing: IconButton(
-                                                      icon: const Icon(Icons.edit, color: Colors.black),
-                                                      onPressed: () {
-                                                        // Implementar ação de edição, se necessário
-                                                      },
-                                                    ),
-                                                  )),
-                                            ],
-                                          ),
-                                        ),
-                                      );
+                                      return _buildPedidoCard(pedido, produtos);
                                     },
                                   );
                                 },
@@ -259,7 +355,7 @@ class _CriarPedidosState extends State<ComandaPage> {
                   ],
                 ),
               ),
-      ),
+            ),
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart'; // Importa o Google Fonts
 import 'package:flutter_application_praticas/pages/home_page.dart';
+import 'package:flutter_application_praticas/pages/login_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:google_fonts/google_fonts.dart'; 
 import 'options/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -8,8 +10,17 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
+    
   );
-  runApp(const MyApp());
+  
+  runApp(MaterialApp(
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate
+      ],
+      supportedLocales: [const Locale('pt', 'BR')],
+      home: MyApp(),
+    ),);
 }
 
 class MyApp extends StatelessWidget {
