@@ -3,6 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
+
+import '../services/PrinterService.dart';
+
 class TelaPedidosTxt extends StatefulWidget {
   const TelaPedidosTxt({super.key});
 
@@ -13,16 +16,26 @@ class TelaPedidosTxt extends StatefulWidget {
 class _TelaPedidosTxtState extends State<TelaPedidosTxt> with SingleTickerProviderStateMixin {
   bool _isLoading = false;
   late TabController _tabController;
+  final PrinterService _printerService = PrinterService();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _initializePrinter();
+  }
+
+  Future<void> _initializePrinter() async {
+    await _printerService.initializePrinter();
+    if (mounted) {
+      await _printerService.connectToPrinter(context);
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _printerService.disconnect();
     super.dispose();
   }
 
@@ -71,16 +84,15 @@ class _TelaPedidosTxtState extends State<TelaPedidosTxt> with SingleTickerProvid
           return const Center(child: Text('Nenhum pedido encontrado'));
         }
 
-        // Filtra os pedidos baseado na aba selecionada
         final filteredDocs = snapshot.data!.docs.where((doc) {
           final pedidoData = doc.data() as Map<String, dynamic>;
           final temMesa = pedidoData['mesa'] != null;
           final temNomeCliente = pedidoData['nomeCliente'] != null;
           
           if (isMesaPedidos) {
-            return temMesa && !temNomeCliente; // Apenas pedidos por mesa
+            return temMesa && !temNomeCliente;
           } else {
-            return temNomeCliente; // Apenas pedidos com nome de cliente
+            return temNomeCliente;
           }
         }).toList();
 
@@ -188,64 +200,121 @@ class _TelaPedidosTxtState extends State<TelaPedidosTxt> with SingleTickerProvid
     setState(() => _isLoading = true);
 
     try {
-      // Gerar conteúdo do texto
-      StringBuffer conteudo = StringBuffer();
-
-      // Cabeçalho
-      conteudo.writeln('============================');
-      conteudo.writeln('       PEDIDO #$pedidoId      ');
-      conteudo.writeln('============================\n');
-
-      // Data e hora
-      final timestamp = pedidoData['dataCriacao'] as Timestamp?;
-      final data = timestamp?.toDate() ?? DateTime.now();
-      conteudo.writeln('Data: ${data.day}/${data.month}/${data.year}');
-      conteudo.writeln('Hora: ${data.hour}:${data.minute}\n');
-
-      // Dados do cliente
-      conteudo.writeln('CLIENTE');
-      conteudo.writeln('Nome: ${pedidoData['nomeCliente']}');
-      if (pedidoData['telefoneCliente'] != null) {
-        conteudo.writeln('Tel: ${pedidoData['telefoneCliente']}');
-      }
-      conteudo.writeln('\nPRODUTOS');
-      conteudo.writeln('----------------------------');
-
-      // Produtos
-      final List<DocumentReference> produtosRefs = 
-        List<DocumentReference>.from(pedidoData['listaProdutos'] ?? []);
+      // Generate content
+      final conteudo = await _generateOrderContent(pedidoId, pedidoData);
       
-      for (var ref in produtosRefs) {
-        final doc = await ref.get();
-        if (doc.exists) {
-          final produto = doc.data() as Map<String, dynamic>;
-          final nome = produto['nome'];
-          final preco = produto['preco']?.toDouble() ?? 0.0;
-          
-          conteudo.writeln(nome);
-          conteudo.writeln('R\$ ${preco.toStringAsFixed(2)}');
-          conteudo.writeln('----------------------------');
+      // Save to file
+      await _saveToFile(pedidoId, conteudo);
+      
+      // Print the order if printer is connected
+      if (_printerService.isConnected) {
+        await _printOrder(conteudo);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Impressora não está conectada'),
+              backgroundColor: Colors.orange,
+            ),
+          );
         }
       }
-
-      // Total
-      final valorTotal = pedidoData['valorTotal']?.toDouble() ?? 0.0;
-      conteudo.writeln('\nTOTAL: R\$ ${valorTotal.toStringAsFixed(2)}');
-      conteudo.writeln('\n============================');
-
-      // Salvar arquivo
-      final directory = await getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/pedido_$pedidoId.txt');
-      await file.writeAsString(conteudo.toString());
-
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Arquivo salvo em: ${file.path}'),
-            action: SnackBarAction(
-              label: 'OK',
-              onPressed: () {},
-            ),
+            content: Text('Erro ao processar pedido: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<String> _generateOrderContent(String pedidoId, Map<String, dynamic> pedidoData) async {
+    StringBuffer conteudo = StringBuffer();
+
+    // Header
+    conteudo.writeln('============================');
+    conteudo.writeln('       PEDIDO #$pedidoId      ');
+    conteudo.writeln('============================\n');
+
+    // Date and time
+    final timestamp = pedidoData['dataCriacao'] as Timestamp?;
+    final data = timestamp?.toDate() ?? DateTime.now();
+    conteudo.writeln('Data: ${data.day}/${data.month}/${data.year}');
+    conteudo.writeln('Hora: ${data.hour}:${data.minute}\n');
+
+    // Client data
+    conteudo.writeln('CLIENTE');
+    final nomeCliente = pedidoData['nomeCliente'];
+    if (nomeCliente != null) {
+      conteudo.writeln('Nome: $nomeCliente');
+    } else {
+      final mesaRef = pedidoData['mesa'] as DocumentReference?;
+      final numMesa = await _getNumMesa(mesaRef);
+      conteudo.writeln(numMesa);
+    }
+    
+    if (pedidoData['telefoneCliente'] != null) {
+      conteudo.writeln('Tel: ${pedidoData['telefoneCliente']}');
+    }
+    conteudo.writeln('\nPRODUTOS');
+    conteudo.writeln('----------------------------');
+
+    // Products
+    final List<DocumentReference> produtosRefs = 
+      List<DocumentReference>.from(pedidoData['listaProdutos'] ?? []);
+    
+    for (var ref in produtosRefs) {
+      final doc = await ref.get();
+      if (doc.exists) {
+        final produto = doc.data() as Map<String, dynamic>;
+        final nome = produto['nome'];
+        final preco = produto['preco']?.toDouble() ?? 0.0;
+        
+        conteudo.writeln(nome);
+        conteudo.writeln('R\$ ${preco.toStringAsFixed(2)}');
+        conteudo.writeln('----------------------------');
+      }
+    }
+
+    // Total
+    final valorTotal = pedidoData['valorTotal']?.toDouble() ?? 0.0;
+    conteudo.writeln('\nTOTAL: R\$ ${valorTotal.toStringAsFixed(2)}');
+    conteudo.writeln('\n============================');
+
+    return conteudo.toString();
+  }
+
+  Future<void> _saveToFile(String pedidoId, String content) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final file = File('${directory.path}/pedido_$pedidoId.txt');
+    await file.writeAsString(content);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Arquivo salvo em: ${file.path}'),
+          action: SnackBarAction(
+            label: 'OK',
+            onPressed: () {},
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _printOrder(String content) async {
+    try {
+      final bytes = await _printerService.printContent(content);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Pedido enviado para impressora'),
+            backgroundColor: Colors.green,
           ),
         );
       }
@@ -253,13 +322,11 @@ class _TelaPedidosTxtState extends State<TelaPedidosTxt> with SingleTickerProvid
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erro ao gerar arquivo: $e'),
+            content: Text('Erro ao imprimir: $e'),
             backgroundColor: Colors.red,
           ),
         );
       }
-    } finally {
-      setState(() => _isLoading = false);
     }
   }
 }
