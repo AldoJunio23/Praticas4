@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_praticas/components/custom_drawer.dart';
 import 'package:flutter_application_praticas/pages/cardapio_page.dart';
-import 'package:flutter_application_praticas/pages/comanda_page.dart';
-import 'package:flutter_application_praticas/pages/cozinha_page.dart';
+import 'package:flutter_application_praticas/pages/cliente_pedidos_page.dart';
+import 'package:flutter_application_praticas/pages/pedidos_impressao_page.dart';
 import 'package:flutter_application_praticas/pages/mesas_page.dart';
+import 'package:flutter_application_praticas/pages/new_pedido_cliente_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,7 +20,7 @@ class HomePageState extends State<HomePage> {
       drawer: const CustomDrawer(),
       appBar: AppBar(
         title: const Text(
-          'Cantinho do Espeto',
+          'Home',
           style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
         flexibleSpace: Container(
@@ -59,24 +60,15 @@ class HomePageState extends State<HomePage> {
               children: [
                 const SizedBox(height: 20),
                 Center(
-                  
                   child: Image.asset(
                     'assets/logo.png',
-                    height: MediaQuery.of(context).size.height * 0.35,
+                    height: MediaQuery.of(context).size.height * 0.40,
                   ),
                 ),
                 
                 const SizedBox(height: 30),
                 const Padding(
                   padding: EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    'Menu Principal',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                 ),
                 const SizedBox(height: 20),
                 GridView.count(
@@ -97,20 +89,20 @@ class HomePageState extends State<HomePage> {
                     ),
                     _buildMenuCard(
                       context: context,
-                      title: 'Comandas',
+                      title: 'Imprimir Pedidos',
                       icon: Icons.receipt_long,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const ComandaPage()),
+                        MaterialPageRoute(builder: (context) => const TelaPedidosTxt()),
                       ),
                     ),
                     _buildMenuCard(
                       context: context,
-                      title: 'Cozinha',
-                      icon: Icons.restaurant,
+                      title: 'Clientes',
+                      icon: Icons.people,
                       onTap: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const CozinhaPage()),
+                        MaterialPageRoute(builder: (context) => const TelaClientesPedidos()),
                       ),
                     ),
                     _buildMenuCard(
@@ -139,16 +131,17 @@ class HomePageState extends State<HomePage> {
     required VoidCallback onTap,
   }) {
     return Card(
-      elevation: 4,
+      elevation: 8,
+      shadowColor: Colors.black26,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(20),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -156,23 +149,47 @@ class HomePageState extends State<HomePage> {
                 Colors.white,
                 Colors.orange[50]!,
               ],
+              stops: const [0.4, 1],
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 40,
-                color: Colors.orange[800],
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orange[100],
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.orange.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  icon,
+                  size: 32,
+                  color: Colors.orange[900],
+                ),
               ),
               const SizedBox(height: 12),
               Text(
                 title,
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.orange[900],
+                  letterSpacing: 0.5,
                 ),
               ),
             ],

@@ -36,7 +36,7 @@ class PedidoService {
         if (pedidoData['listaProdutos'] is List) {
           listaProdutos = (pedidoData['listaProdutos'] as List)
               .whereType<DocumentReference<Object?>>()
-              .map((produto) => produto as DocumentReference<Object?>)
+              .map((produto) => produto)
               .toList();
         }
 
@@ -87,7 +87,7 @@ class PedidoService {
         if (pedidoData['listaProdutos'] is List) {
           listaProdutos = (pedidoData['listaProdutos'] as List)
               .whereType<DocumentReference<Object?>>()
-              .map((produto) => produto as DocumentReference<Object?>)
+              .map((produto) => produto)
               .toList();
         }
 
@@ -123,7 +123,7 @@ class PedidoService {
         if (pedidoData['listaProdutos'] is List) {
           listaProdutos = (pedidoData['listaProdutos'] as List)
               .whereType<DocumentReference<Object?>>()
-              .map((produto) => produto as DocumentReference<Object?>)
+              .map((produto) => produto)
               .toList();
         }
 

@@ -1,47 +1,56 @@
 plugins {
     id "com.android.application"
-    // START: FlutterFire Configuration
-    id 'com.google.gms.google-services'
-    // END: FlutterFire Configuration
     id "kotlin-android"
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services" // Firebase configuration
+    id "dev.flutter.flutter-gradle-plugin" // Flutter Gradle plugin
 }
 
 android {
     namespace = "com.example.flutter_application_praticas"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 34 // Atualizado para combinar com o `compileSdkVersion`
+
+    ndkVersion = "25.2.9519653" // Especifique o NDK usado (opcional, mas útil se necessário)
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = "11"
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.flutter_application_praticas"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdk = 23 // Atualizado para suportar bibliotecas como `firebase_auth`
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
+            // Ativar redução de código e remoção de recursos não utilizados
+            minifyEnabled true
+            shrinkResources true
+
+            // Especificar o arquivo ProGuard
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
+            // Configuração de assinatura de debug (ajuste conforme necessário para produção)
+            signingConfig signingConfigs.debug
+        }
+        debug {
+            // Configurações específicas para o modo de debug
+            minifyEnabled false
+            shrinkResources false
         }
     }
 }
 
 flutter {
-    source = "../.."
+    source = "../.." // Diretório do código fonte Flutter
 }
+
+// Adicione o plugin do Google Services para configurar Firebase
+apply plugin: 'com.google.gms.google-services'

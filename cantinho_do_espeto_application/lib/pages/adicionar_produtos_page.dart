@@ -25,6 +25,14 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
   double totalComanda = 0.0;
   double valorTotalAtual = 0.0;
   bool _isLoading = false;
+  String _categoriaSelecionada = 'Todos';
+
+  final Map<String, String> _categoriasMap = {
+    'prod-bebida': 'Bebidas',
+    'prod-espetos': 'Espetos',
+    'prod-adicional': 'Adicionais',
+    'prod-caldo': 'Caldos',
+  };
 
   @override
   void initState() {
@@ -113,6 +121,16 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
     }
   }
 
+  void _mostrarErro(String mensagem) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(mensagem),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   Future<void> _adicionarProdutosNaMesa() async {
     setState(() => _isLoading = true);
     try {
@@ -128,9 +146,9 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
     setState(() => _isLoading = false);
   }
 
-  Future<List<Map<String, dynamic>>> _getAllProdutos() async {
-    final collectionNames = ['prod-bebida', 'prod-espetos','prod-adicional', 'prod-caldo' ];
-    final docNames = ['PoDiOnHmAULfo04IFIZy', 'r68ahS3Ck96LGZEVzZma', 'FFgYAgy1ACxpqOPfekEi', 'EI0XR8FLCNQJXJ0EbzHL' ];
+   Future<List<Map<String, dynamic>>> _getAllProdutos() async {
+    final collectionNames = ['prod-bebida', 'prod-espetos', 'prod-adicional', 'prod-caldo'];
+    final docNames = ['PoDiOnHmAULfo04IFIZy', 'r68ahS3Ck96LGZEVzZma', 'FFgYAgy1ACxpqOPfekEi', 'EI0XR8FLCNQJXJ0EbzHL'];
     List<Map<String, dynamic>> allProdutos = [];
 
     try {
@@ -145,9 +163,14 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
           'id': doc.id,
           'docName': docNames[i],
           'collectionName': collectionNames[i],
+          'categoria': _categoriasMap[collectionNames[i]] ?? 'Outros',
           ...doc.data(),
         }));
       }
+
+      // Ordenar produtos em ordem alfabética
+      allProdutos.sort((a, b) => a['nome'].toString().compareTo(b['nome'].toString()));
+      
     } catch (e) {
       _mostrarErro('Erro ao carregar produtos: $e');
     }
@@ -155,12 +178,42 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
     return allProdutos;
   }
 
-  void _mostrarErro(String mensagem) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(mensagem),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
+  List<Map<String, dynamic>> _filtrarProdutos(List<Map<String, dynamic>> produtos) {
+    if (_categoriaSelecionada == 'Todos') {
+      return produtos;
+    }
+    return produtos.where((produto) => 
+      _categoriasMap[produto['collectionName']] == _categoriaSelecionada
+    ).toList();
+  }
+
+  Widget _buildCategoryFilter() {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            FilterChip(
+              label: const Text('Todos'),
+              selected: _categoriaSelecionada == 'Todos',
+              onSelected: (bool selected) {
+                setState(() => _categoriaSelecionada = 'Todos');
+              },
+            ),
+            const SizedBox(width: 8),
+            ..._categoriasMap.values.map((categoria) => Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: FilterChip(
+                label: Text(categoria),
+                selected: _categoriaSelecionada == categoria,
+                onSelected: (bool selected) {
+                  setState(() => _categoriaSelecionada = categoria);
+                },
+              ),
+            )),
+          ],
+        ),
       ),
     );
   }
@@ -169,12 +222,25 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
         title: const Text(
           "Adicionar Produtos ao Pedido",
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.grey[800],
-        elevation: 2,
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.bottomRight,
+              colors: [Colors.orange[900]!.withOpacity(1), Colors.orange[900]!.withOpacity(0.9)],
+              stops: const [0.6, 1],
+            ),
+          ),
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -201,10 +267,11 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
                   );
                 }
 
-                produtosDisponiveis = snapshot.data ?? [];
+                produtosDisponiveis = _filtrarProdutos(snapshot.data ?? []);
 
                 return Column(
                   children: [
+                    _buildCategoryFilter(),
                     Expanded(
                       child: ListView.builder(
                         padding: const EdgeInsets.all(8),
@@ -228,12 +295,24 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              subtitle: Text(
-                                'R\$ ${produto['valor'].toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  color: Colors.green[700],
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'R\$ ${produto['valor'].toStringAsFixed(2)}',
+                                    style: TextStyle(
+                                      color: Colors.green[700],
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    _categoriasMap[produto['collectionName']] ?? 'Outros',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
                               ),
                               trailing: Container(
                                 decoration: BoxDecoration(
@@ -305,7 +384,7 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
                             children: [
                               ElevatedButton.icon(
                                 onPressed: () => Navigator.pop(context),
-                                icon: const Icon(Icons.cancel),
+                                icon: const Icon(Icons.cancel, color: Colors.white),
                                 label: const Text('Cancelar'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.red,
@@ -317,12 +396,15 @@ class _TelaAdicionarProdutosPedidoState extends State<TelaAdicionarProdutosPedid
                                 ),
                               ),
                               ElevatedButton.icon(
-                                onPressed: _adicionarProdutosNaMesa,
-                                icon: const Icon(Icons.check_circle),
+                                onPressed: produtosSelecionados.isNotEmpty 
+                                  ? _adicionarProdutosNaMesa 
+                                  : null, // Desabilita o botão se não houver produtos
+                                icon: const Icon(Icons.check_circle, color: Colors.white),
                                 label: const Text('Confirmar'),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.green,
                                   foregroundColor: Colors.white,
+                                  disabledBackgroundColor: Colors.grey[400], // Cor quando desabilitado
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 32,
                                     vertical: 16,

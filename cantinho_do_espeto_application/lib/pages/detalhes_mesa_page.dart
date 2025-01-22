@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_praticas/pages/adicionar_produtos_page.dart';
-import 'package:flutter_application_praticas/pages/finalizar_comanda_page.dart';
+import 'package:flutter_application_praticas/pages/finalizar_mesa_page.dart';
 import '../services/pedido_service.dart';
 
 class TelaDetalhesMesas extends StatefulWidget {
@@ -21,6 +21,9 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
   DocumentReference? mesaRef;
   bool isLoading = true;
   double totalComanda = 0.0;
+  bool isPedidoFinalizado = false;
+  List<Map<String, dynamic>> allProducts = [];
+  double totalAllOrders = 0.0;
 
   @override
   void initState() {
@@ -49,55 +52,169 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
   }
 
   void _navigateToNextPage() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => TelaAdicionarProdutosPedido(
-          pedidoId: pedidoID,
-          mesaReference: mesaRef,
-        ),
-      ),
-    );
+    try {
+        // Cria o pedido e obtém o ID
+        String pedidoId = await _criarPedido();
+        
+        if (mounted) {  // Verifica se o widget ainda está montado
+            final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => TelaAdicionarProdutosPedido(
+                        pedidoId: pedidoId,
+                        mesaReference: mesaRef,
+                    ),
+                ),
+            );
 
-    if (result == true) {
-      setState(() {
-        _carregarDadosMesa();
-      });
+            if (result == true) {
+                setState(() {
+                    _carregarDadosMesa();
+                });
+            }
+        }
+    } catch (e) {
+        if (mounted) {  // Verifica se o widget ainda está montado
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                    content: Text('Erro ao criar pedido: $e'),
+                    backgroundColor: Colors.red,
+                ),
+            );
+        }
     }
-  }
+}
 
   Future<void> _carregarDadosMesa() async {
-    setState(() => isLoading = true);
-    try {
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('Mesas')
-          .doc(widget.mesaId)
+  setState(() => isLoading = true);
+  try {
+    // Obtém os dados da mesa
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('Mesas')
+        .doc(widget.mesaId)
+        .get();
+
+    if (doc.exists) {
+      setState(() {
+        isOcupada = doc['status'] ?? false;
+        _numMesa = doc['numMesa'];
+      });
+
+      mesaRef = doc.reference;
+
+      // Verifica se há pedidos não finalizados para esta mesa
+      QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
+          .collection('Pedidos')
+          .where('mesa', isEqualTo: mesaRef)
+          .where('finalizado', isEqualTo: false)
           .get();
 
-      if (doc.exists) {
-        setState(() {
-          isOcupada = doc['status'] ?? false;
-          _numMesa = doc['numMesa'];
-        });
+      // Se houver pedidos em aberto, ajusta para ocupada
+      if (pedidosSnapshot.docs.isNotEmpty) {
+        await FirebaseFirestore.instance
+          .collection('Mesas')
+          .doc(widget.mesaId)
+          .update({'status': true});
+          
+        setState(() => isOcupada = true);
+      }
+      
 
-        mesaRef = doc.reference;
-        Map<String, dynamic>? pedido =
-            await PedidoService().buscarPedidoPorMesa(mesaRef!);
-        pedidoID = pedido?['id'].toString();
+      // Carrega os pedidos relacionados
+      await _carregarTodosPedidos();
+    }
+  } catch (e) {
+    _mostrarErro('Erro ao carregar dados da mesa: $e');
+  } finally {
+    setState(() => isLoading = false);
+  }
+}
 
-        if (pedido != null) {
-          List<DocumentReference<Object?>> listaProdutosRefs =
-              List<DocumentReference<Object?>>.from(pedido['listaProdutos']);
-          await _carregarProdutos(listaProdutosRefs);
+  Future<String> _criarPedido() async {
+    // Primeiro, garante que temos a referência correta da mesa
+    var querySnapshot = await FirebaseFirestore.instance
+        .collection('Mesas')
+        .doc(widget.mesaId)  // Usa o ID da mesa diretamente
+        .get();
+
+    if (querySnapshot.exists) {
+        mesaRef = querySnapshot.reference;
+    } else {
+        throw Exception('Mesa não encontrada');
+    }
+
+    // Cria o pedido com a referência correta da mesa
+    DocumentReference novoPedidoRef = await FirebaseFirestore.instance.collection('Pedidos').add({
+        'mesa': mesaRef,
+        'dataCriacao': FieldValue.serverTimestamp(),
+        'finalizado': false,
+        'listaProdutos': [],
+        'valorTotal': 0.0,
+    });
+    
+    return novoPedidoRef.id;
+}
+
+  Future<void> _carregarTodosPedidos() async {
+    try {
+      QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
+          .collection('Pedidos')
+          .where('mesa', isEqualTo: mesaRef)
+          .get();
+
+      List<Map<String, dynamic>> todosProdutos = [];
+      Map<String, int> produtoQuantidades = {};
+      Map<String, double> produtoPrecos = {};
+      double total = 0.0;
+
+      for (var pedidoDoc in pedidosSnapshot.docs) {
+        Map<String, dynamic> pedido = pedidoDoc.data() as Map<String, dynamic>;
+        List<DocumentReference> produtosRefs = List<DocumentReference>.from(pedido['listaProdutos'] ?? []);
+
+        for (var produtoRef in produtosRefs) {
+          DocumentSnapshot produtoDoc = await produtoRef.get();
+          if (produtoDoc.exists) {
+            Map<String, dynamic> produtoData = produtoDoc.data() as Map<String, dynamic>;
+            String produtoId = produtoDoc.id;
+            String nome = produtoData['nome'] ?? 'Produto desconhecido';
+            double preco = produtoData['valor']?.toDouble() ?? 0.0;
+            String imagemUrl = produtoData['imagem'] ?? '';
+
+            // Atualizar contagem e preço
+            produtoQuantidades[produtoId] = (produtoQuantidades[produtoId] ?? 0) + 1;
+            produtoPrecos[produtoId] = preco;
+
+            // Adicionar produto se ainda não existe na lista
+            if (!todosProdutos.any((p) => p['id'] == produtoId)) {
+              todosProdutos.add({
+                'id': produtoId,
+                'nome': nome,
+                'preco': preco,
+                'imagem': imagemUrl,
+              });
+            }
+
+            total += preco;
+          }
         }
       }
+
+      // Adicionar quantidades aos produtos
+      for (var produto in todosProdutos) {
+        String produtoId = produto['id'];
+        produto['qtd'] = produtoQuantidades[produtoId] ?? 0;
+        produto['subtotal'] = (produtoQuantidades[produtoId] ?? 0) * (produtoPrecos[produtoId] ?? 0.0);
+      }
+
+      setState(() {
+        allProducts = todosProdutos;
+        totalAllOrders = total;
+      });
+
     } catch (e) {
-      _mostrarErro('Erro ao carregar dados da mesa: $e');
-    } finally {
-      setState(() => isLoading = false);
+      print('Erro ao carregar todos os pedidos: $e');
     }
   }
-
  Future<void> _carregarProdutos(
   List<DocumentReference<Object?>> produtosRefs) async {
     try {
@@ -154,6 +271,24 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
 
   Future<void> _alterarStatusMesa(bool novoStatus) async {
     try {
+      if (!novoStatus) {
+        QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
+            .collection('Pedidos')
+            .where('mesa', isEqualTo: mesaRef)
+            .where('finalizado', isEqualTo: false) 
+            .get();
+
+        if (pedidosSnapshot.docs.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Não é possível liberar a mesa com pedidos em aberto'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+      }
+
       await FirebaseFirestore.instance
           .collection('Mesas')
           .doc(widget.mesaId)
@@ -172,10 +307,15 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+@override
+Widget build(BuildContext context) {
+  return DefaultTabController(
+    length: 2,
+    child: Scaffold(
       appBar: AppBar(
+        iconTheme: const IconThemeData(
+          color: Colors.white,
+        ),
         elevation: 0,
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
@@ -210,6 +350,20 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
             onPressed: _carregarDadosMesa,
           ),
         ],
+        bottom: const TabBar(
+          tabs: [
+            Tab(
+              icon: Icon(Icons.restaurant_menu, color: Colors.white),
+              text: "Produtos",
+            ),
+            Tab(
+              icon: Icon(Icons.receipt_long, color: Colors.white),
+              text: "Pedidos",
+            ),
+          ],
+          labelStyle: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          unselectedLabelStyle: TextStyle(color: Colors.white),
+        ),
       ),
       body: isLoading
           ? const Center(
@@ -219,15 +373,156 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
             )
           : Column(
               children: [
-                _buildStatusCard(),
                 Expanded(
-                  child: _buildProdutosList(),
+                  child: TabBarView(
+                    children: [
+                      _buildProdutosList(),
+                      _buildPedidosList(),
+                    ],
+                  ),
                 ),
-                _buildBottomActions(),
               ],
             ),
+      bottomNavigationBar: _buildBottomActions(),
+    ),
+  );
+}
+
+  Widget _buildPedidosList() {
+    return FutureBuilder<QuerySnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('Pedidos')
+          .where('mesa', isEqualTo: mesaRef)
+          .where('finalizado', isEqualTo: false)
+          .get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.receipt, size: 64, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  'Nenhum pedido em andamento',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        List<DocumentSnapshot> pedidos = snapshot.data!.docs;
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: pedidos.length,
+          itemBuilder: (context, index) {
+            final pedido = pedidos[index].data() as Map<String, dynamic>;
+            final pedidoId = pedidos[index].id;
+            final bool isFinalizado = pedido['finalizado'] ?? false;
+            final List<dynamic> listaProdutos = pedido['listaProdutos'] ?? [];
+            
+            return Card(
+              elevation: 2,
+              margin: const EdgeInsets.only(bottom: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: InkWell( // Added InkWell for tap handling
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TelaAdicionarProdutosPedido(
+                        pedidoId: pedidoId,
+                        mesaReference: mesaRef,
+                      ),
+                    ),
+                  ).then((result) {
+                    if (result == true) {
+                      setState(() {
+                        _carregarDadosMesa();
+                      });
+                    }
+                  });
+                },
+                child: ExpansionTile(
+                  title: Row(
+                    children: [
+                      Text(
+                        'Pedido ${index + 1}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Icon(
+                        isFinalizado ? Icons.check_circle : Icons.pending,
+                        color: isFinalizado ? Colors.green : Colors.orange,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Status: Em andamento',
+                        style: TextStyle(
+                          color: Colors.orange,
+                        ),
+                      ),
+                      Text(
+                        'Total: R\$ ${pedido['valorTotal']?.toStringAsFixed(2) ?? "0.00"}',
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        'Toque para editar',
+                        style: TextStyle(
+                          color: Colors.blue,
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                  ),
+                  children: [
+                    FutureBuilder<List<Widget>>(
+                      future: _buildProdutosPedido(listaProdutos),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        return Column(children: snapshot.data ?? []);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
+
 
   Widget _buildStatusCard() {
     return Card(
@@ -311,8 +606,58 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
     );
   }
 
-  Widget _buildProdutosList() {
-    if (produtos.isEmpty) {
+  Future<List<Widget>> _buildProdutosPedido(List<dynamic> produtosRefs) async {
+    List<Widget> produtosWidgets = [];
+    
+    for (var produtoRef in produtosRefs) {
+      if (produtoRef is DocumentReference) {
+        try {
+          DocumentSnapshot produtoDoc = await produtoRef.get();
+          if (produtoDoc.exists) {
+            Map<String, dynamic> produtoData = produtoDoc.data() as Map<String, dynamic>;
+            
+            produtosWidgets.add(
+              ListTile(
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    produtoData['imagem'] ?? '',
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      width: 40,
+                      height: 40,
+                      color: Colors.grey[200],
+                      child: const Icon(Icons.error),
+                    ),
+                  ),
+                ),
+                title: Text(
+                  produtoData['nome'] ?? 'Produto desconhecido',
+                  style: const TextStyle(fontSize: 14),
+                ),
+                trailing: Text(
+                  'R\$ ${produtoData['valor']?.toStringAsFixed(2) ?? "0.00"}',
+                  style: const TextStyle(
+                    color: Colors.green,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            );
+          }
+        } catch (e) {
+          print('Erro ao carregar produto: $e');
+        }
+      }
+    }
+    
+    return produtosWidgets;
+  }
+
+   Widget _buildProdutosList() {
+    if (allProducts.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -320,7 +665,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
             Icon(Icons.restaurant_menu, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              'Nenhum produto adicionado',
+              'Nenhum produto consumido nesta mesa',
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey[600],
@@ -334,24 +679,28 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
 
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.orange[50],
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Produtos',
+                'Total Consumido',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Text(
-                'Total: R\$ ${totalComanda.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 18,
+                'R\$ ${totalAllOrders.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange,
+                  color: Colors.orange[900],
                 ),
               ),
             ],
@@ -360,9 +709,9 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: produtos.length,
+            itemCount: allProducts.length,
             itemBuilder: (context, index) {
-              final produto = produtos[index];
+              final produto = allProducts[index];
               return Card(
                 elevation: 2,
                 margin: const EdgeInsets.only(bottom: 12),
@@ -393,12 +742,23 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                       fontSize: 16,
                     ),
                   ),
-                  subtitle: Text(
-                    'R\$ ${(produto['preco'] * produto['qtd']).toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: Colors.green[700],
-                      fontWeight: FontWeight.w500,
-                    ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Preço unitário: R\$ ${produto['preco'].toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      Text(
+                        'Subtotal: R\$ ${produto['subtotal'].toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: Colors.green[700],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                   trailing: Container(
                     padding: const EdgeInsets.all(8),
@@ -423,6 +783,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
     );
   }
 
+
   Widget _buildBottomActions() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -440,8 +801,8 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
         children: [
           Expanded(
             child: ElevatedButton.icon(
-              icon: const Icon(Icons.add_shopping_cart, color: Colors.white,),
-              label: const Text('Adicionar Produtos', style: TextStyle(color: Colors.white),),
+              icon: const Icon(Icons.add_shopping_cart, color: Colors.white),
+              label: const Text('Criar pedido', style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange[900],
                 padding: const EdgeInsets.symmetric(vertical: 16),
@@ -452,12 +813,12 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
               onPressed: _navigateToNextPage,
             ),
           ),
-          if (produtos.isNotEmpty) ...[
+          if (allProducts.isNotEmpty) ...[
             const SizedBox(width: 16),
             Expanded(
               child: ElevatedButton.icon(
-                icon: const Icon(Icons.payment, color:  Colors.white,),
-                label: const Text('Finalizar Comanda', style: TextStyle(color: Colors.white),),
+                icon: const Icon(Icons.payment, color: Colors.white),
+                label: const Text('Finalizar Mesa', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -465,14 +826,34 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          FinalizarComandaPage(pedidoId: pedidoID),
-                    ),
-                  );
+                onPressed: () async {
+                  // Get the current active pedido
+                  Map<String, dynamic>? pedido =
+                      await PedidoService().buscarPedidoPorMesa(mesaRef!);
+                  String? currentPedidoId = pedido?['id'].toString();
+
+                  if (currentPedidoId != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FinalizarMesaPage(
+                          pedidoId: currentPedidoId,
+                          mesaId: widget.mesaId,
+                        ),
+                      ),
+                    ).then((value) {
+                      if (value == true) {
+                        _carregarDadosMesa(); // Reload data after finalizing
+                      }
+                    });
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Não foi possível encontrar o pedido atual'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
                 },
               ),
             ),

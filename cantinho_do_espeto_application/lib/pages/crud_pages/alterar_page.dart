@@ -152,7 +152,7 @@ class _AlterarProdutoState extends State<AlterarProduto> {
           children: [
             TextField(
               controller: _nomeController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Nome do produto",
                 border: OutlineInputBorder(),
               ),
@@ -161,7 +161,7 @@ class _AlterarProdutoState extends State<AlterarProduto> {
             DropdownButtonFormField<String>(
               hint: const Text("Selecione a Categoria"),
               value: _categoriaSelecionada,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
               ),
               items: _subprodutos.map((String subproduto) {
@@ -179,7 +179,7 @@ class _AlterarProdutoState extends State<AlterarProduto> {
             const SizedBox(height: 20),
             TextField(
               controller: _valorController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: "Valor do Produto",
                 border: OutlineInputBorder(),
               ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_praticas/pages/crud_pages/adm_page.dart';
 import 'package:flutter_application_praticas/pages/home_page.dart';
-import 'package:flutter_application_praticas/pages/login_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart'; 
 import 'options/firebase_options.dart';
@@ -10,17 +10,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
-    
   );
-  
-  runApp(MaterialApp(
-      localizationsDelegates: [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate
-      ],
-      supportedLocales: [const Locale('pt', 'BR')],
-      home: MyApp(),
-    ),);
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -29,13 +21,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [Locale('pt', 'BR')],
       theme: ThemeData(
-        textTheme: GoogleFonts.montserratTextTheme( // Define a fonte padrão para todo o tema
-          Theme.of(context).textTheme, // Mantém outros estilos de texto padrão
+        textTheme: GoogleFonts.montserratTextTheme(
+          Theme.of(context).textTheme,
         ),
       ),
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Application PraticasIV',
+      title: 'Cantinho do Espeto',
       home: const HomePage(),
     );
   }

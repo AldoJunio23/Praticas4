@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_praticas/pages/comanda_page.dart';
-import 'package:flutter_application_praticas/pages/cozinha_page.dart';
+import 'package:flutter_application_praticas/pages/pedidos_impressao_page.dart';
 import 'package:flutter_application_praticas/pages/crud_pages/adm_page.dart';
 import 'package:flutter_application_praticas/pages/faturamente_page.dart';
 import 'package:flutter_application_praticas/pages/home_page.dart';
@@ -92,7 +91,7 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => TelaMesas(),
+                  builder: (context) => const TelaMesas(),
                 ),
               );
             },
@@ -100,27 +99,13 @@ class CustomDrawer extends StatelessWidget {
 
           ListTile(
             leading: const Icon(Icons.receipt_long),
-            title: const Text('Comandas'),
+            title: const Text('Imprimir Pedidos'),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ComandaPage(),
-                ),
-              );
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.restaurant),
-            title: const Text('Cozinha'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CozinhaPage(),
+                  builder: (context) => const TelaPedidosTxt(),
                 ),
               );
             },
@@ -134,7 +119,7 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => TelaCardapio(),
+                  builder: (context) => const TelaCardapio(),
                 ),
               );
             },

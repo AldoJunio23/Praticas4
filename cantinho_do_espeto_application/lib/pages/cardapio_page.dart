@@ -121,7 +121,7 @@ class _TelaCardapioState extends State<TelaCardapio> with SingleTickerProviderSt
       elevation: 4,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Container(
+      child: SizedBox(
         height: 120,
         child: Row(
           children: [
@@ -203,6 +203,9 @@ class _TelaCardapioState extends State<TelaCardapio> with SingleTickerProviderSt
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
+              iconTheme: const IconThemeData(
+                color: Colors.white,
+              ),
               title: const Text(
                 'Cardápio',
                 style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
@@ -295,7 +298,7 @@ class _TelaCardapioState extends State<TelaCardapio> with SingleTickerProviderSt
       floatingActionButton: FloatingActionButton(
         onPressed: _carregarProdutos,
         backgroundColor: Colors.orange[900],
-        child: const Icon(Icons.refresh),
+        child: const Icon(Icons.refresh, color: Colors.white),
       ),
     );
   }
