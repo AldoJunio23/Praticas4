@@ -12,11 +12,16 @@ class PrinterService {
   bool _isConnected = false;
   bool _isInitialized = false;
 
+  // Constants for TM-T20X
+  static const String printerModel = 'Epson-TM-T20X';
+  static const int vendorId = 0x04b8;  // Epson vendor ID
+  static const int productId = 0x0e28;  // TM-T20X product ID
+
   Future<bool> initializePrinter() async {
     if (_isInitialized) return _isConnected;
     
     try {
-      debugPrint('Iniciando serviço de impressão...');
+      debugPrint('Iniciando serviço de impressão para $printerModel...');
       _printerManager = PrinterManager.instance;
       
       if (_printerManager == null) {
@@ -46,7 +51,7 @@ class PrinterService {
     }
 
     try {
-      debugPrint('Procurando impressoras...');
+      debugPrint('Procurando impressora $printerModel...');
       bool printerFound = false;
       
       if (_printerManager == null) {
@@ -55,26 +60,30 @@ class PrinterService {
       }
 
       await for (var device in _printerManager!.discovery(type: PrinterType.usb)) {
-        debugPrint('Impressora encontrada: ${device.name}');
-        // Aceita qualquer impressora USB por enquanto, para teste
-        _selectedPrinter = device;
-        printerFound = true;
-        break;
+        debugPrint('Impressora encontrada: ${device.name} (VID: ${device.vendorId}, PID: ${device.productId})');
+        
+
+        if (device.name?.contains(printerModel) ?? false) {
+          _selectedPrinter = device;
+          printerFound = true;
+          break;
+        }
+
       }
 
       if (!printerFound) {
-        debugPrint('Nenhuma impressora encontrada');
-        _showMessage(context, 'Nenhuma impressora encontrada', isError: true);
+        debugPrint('Impressora $printerModel não encontrada');
+        _showMessage(context, 'Impressora $printerModel não encontrada', isError: true);
         return false;
       }
 
-      debugPrint('Tentando conectar à impressora: ${_selectedPrinter?.name}');
+      debugPrint('Conectando à impressora $printerModel: ${_selectedPrinter?.name}');
       var result = await _printerManager?.connect(
         type: PrinterType.usb,
         model: UsbPrinterInput(
-          name: _selectedPrinter!.name ?? '',
-          productId: _selectedPrinter!.productId,
-          vendorId: _selectedPrinter!.vendorId,
+          name: _selectedPrinter!.name ?? printerModel,
+            productId: productId.toRadixString(16), // Converte para String hexadecimal
+            vendorId: vendorId.toRadixString(16),   // Converte para String hexadecimal
         ),
       );
 
@@ -83,7 +92,7 @@ class PrinterService {
       
       _showMessage(
         context,
-        _isConnected ? 'Impressora conectada' : 'Falha ao conectar impressora',
+        _isConnected ? 'Impressora $printerModel conectada' : 'Falha ao conectar impressora $printerModel',
         isError: !_isConnected,
       );
       return _isConnected;
@@ -103,19 +112,21 @@ class PrinterService {
     try {
       List<int> bytes = [];
       
-      // Initialize printer
+      // Comandos específicos para TM-T20X
       bytes.addAll([0x1B, 0x40]); // ESC @ - Initialize printer
+      bytes.addAll([0x1B, 0x74, 0x02]); // ESC t - Select character code table (PC852)
       
-      // Add text content
+      // Configurar tamanho do texto
+      bytes.addAll([0x1B, 0x21, 0x00]); // ESC ! - Select print mode (normal)
+      
+      // Adicionar o conteúdo
       bytes.addAll(latin1.encode(content));
       
-      // Add line feeds at the end
-      bytes.addAll([0x0A, 0x0A]); // Two line feeds
-      
-      // Cut paper
+      // Alimentar papel e cortar
+      bytes.addAll([0x0A, 0x0A, 0x0A]); // Line feeds
       bytes.addAll([0x1D, 0x56, 0x41, 0x00]); // GS V A - Full cut
 
-      debugPrint('Enviando dados para impressora...');
+      debugPrint('Enviando dados para impressora $printerModel...');
       await _printerManager?.send(type: PrinterType.usb, bytes: bytes);
       debugPrint('Dados enviados com sucesso');
       
@@ -143,7 +154,7 @@ class PrinterService {
       try {
         await _printerManager?.disconnect(type: PrinterType.usb);
         _isConnected = false;
-        debugPrint('Impressora desconectada com sucesso');
+        debugPrint('Impressora $printerModel desconectada com sucesso');
       } catch (e) {
         debugPrint('Erro ao desconectar impressora: $e');
       }

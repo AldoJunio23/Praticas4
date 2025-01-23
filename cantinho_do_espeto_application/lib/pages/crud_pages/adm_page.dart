@@ -16,7 +16,7 @@ class _AdminPageState extends State<AdminPage> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final TextEditingController _searchController = TextEditingController();
   String _selectedCategory = 'Todas';
-  bool _showOnlyAvailable = false;
+  final bool _showOnlyAvailable = false;
   String _searchQuery = '';
 
   final List<String> _categories = [

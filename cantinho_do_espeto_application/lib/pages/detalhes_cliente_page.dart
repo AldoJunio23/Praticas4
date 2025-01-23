@@ -32,11 +32,11 @@ class DetalhePedidoClientePageState extends State<DetalhePedidoClientePage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Tem certeza que deseja finalizar este pedido?',
                 style: TextStyle(fontSize: 16),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12),
             ],
           ),
           actions: [

@@ -203,9 +203,6 @@ class _TelaPedidosTxtState extends State<TelaPedidosTxt> with SingleTickerProvid
       // Generate content
       final conteudo = await _generateOrderContent(pedidoId, pedidoData);
       
-      // Save to file
-      await _saveToFile(pedidoId, conteudo);
-      
       // Print the order if printer is connected
       if (_printerService.isConnected) {
         await _printOrder(conteudo);
@@ -273,10 +270,10 @@ class _TelaPedidosTxtState extends State<TelaPedidosTxt> with SingleTickerProvid
       if (doc.exists) {
         final produto = doc.data() as Map<String, dynamic>;
         final nome = produto['nome'];
-        final preco = produto['preco']?.toDouble() ?? 0.0;
+        final valor = produto['valor']?.toDouble() ?? 0.0;
         
         conteudo.writeln(nome);
-        conteudo.writeln('R\$ ${preco.toStringAsFixed(2)}');
+        conteudo.writeln('R\$ ${valor.toStringAsFixed(2)}');
         conteudo.writeln('----------------------------');
       }
     }
@@ -289,23 +286,6 @@ class _TelaPedidosTxtState extends State<TelaPedidosTxt> with SingleTickerProvid
     return conteudo.toString();
   }
 
-  Future<void> _saveToFile(String pedidoId, String content) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/pedido_$pedidoId.txt');
-    await file.writeAsString(content);
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Arquivo salvo em: ${file.path}'),
-          action: SnackBarAction(
-            label: 'OK',
-            onPressed: () {},
-          ),
-        ),
-      );
-    }
-  }
 
   Future<void> _printOrder(String content) async {
     try {

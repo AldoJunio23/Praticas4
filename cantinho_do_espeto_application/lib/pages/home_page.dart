@@ -4,7 +4,6 @@ import 'package:flutter_application_praticas/pages/cardapio_page.dart';
 import 'package:flutter_application_praticas/pages/cliente_pedidos_page.dart';
 import 'package:flutter_application_praticas/pages/pedidos_impressao_page.dart';
 import 'package:flutter_application_praticas/pages/mesas_page.dart';
-import 'package:flutter_application_praticas/pages/new_pedido_cliente_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
