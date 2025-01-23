@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../services/PrinterService.dart';
 
 class FinalizarMesaPage extends StatefulWidget {
   final String mesaId;
@@ -16,6 +17,7 @@ class FinalizarMesaPage extends StatefulWidget {
 }
 
 class _FinalizarMesaPageState extends State<FinalizarMesaPage> {
+  final PrinterService _printerService = PrinterService();
   bool isLoading = true;
   List<Map<String, dynamic>> allProducts = [];
   double totalAllOrders = 0.0;
@@ -26,6 +28,20 @@ class _FinalizarMesaPageState extends State<FinalizarMesaPage> {
     super.initState();
     _loadMesaReference();
     _carregarTodosPedidos();
+    _initializePrinter();
+  }
+
+  Future<void> _initializePrinter() async {
+    await _printerService.initializePrinter();
+    if (mounted) {
+      await _printerService.connectToPrinter(context);
+    }
+  }
+
+  @override
+  void dispose() {
+    _printerService.disconnect();
+    super.dispose();
   }
 
   Future<void> _loadMesaReference() async {
@@ -94,53 +110,133 @@ class _FinalizarMesaPageState extends State<FinalizarMesaPage> {
   }
 
   Future<void> _finalizarMesa() async {
-    setState(() => isLoading = true);
+  setState(() => isLoading = true);
 
-    try {
-      // Atualizar status da mesa
-      await FirebaseFirestore.instance
-          .collection('Mesas')
-          .doc(widget.mesaId)
-          .update({'status': false});
+  try {
+    // Existing finalization logic...
+    await FirebaseFirestore.instance
+        .collection('Mesas')
+        .doc(widget.mesaId)
+        .update({'status': false});
 
-      // Finalizar todos os pedidos da mesa
-      QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
-          .collection('Pedidos')
-          .where('mesa', isEqualTo: mesaRef)
-          .where('finalizado', isEqualTo: false)
-          .get();
+    // Finalizar todos os pedidos da mesa
+    QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
+        .collection('Pedidos')
+        .where('mesa', isEqualTo: mesaRef)
+        .where('finalizado', isEqualTo: false)
+        .get();
 
-      // Batch write para finalizar todos os pedidos
-      WriteBatch batch = FirebaseFirestore.instance.batch();
-      
-      for (var doc in pedidosSnapshot.docs) {
-        batch.update(doc.reference, {
-          'finalizado': true,
-          'listaProdutos': [],
-          'dataFinalizacao': FieldValue.serverTimestamp(),
-        });
+    WriteBatch batch = FirebaseFirestore.instance.batch();
+    
+    for (var doc in pedidosSnapshot.docs) {
+      batch.update(doc.reference, {
+        'finalizado': true,
+        'listaProdutos': [],
+        'dataFinalizacao': FieldValue.serverTimestamp(),
+      });
+    }
+    
+    await batch.commit();
+
+    // Print the order if printer is connected
+    if (_printerService.isConnected) {
+      final conteudo = await _generateFinalizacaoContent();
+      await _printOrder(conteudo);
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Impressora não está conectada'),
+            backgroundColor: Colors.orange,
+          ),
+        );
       }
-      
-      await batch.commit();
+    }
 
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Mesa finalizada com sucesso!'),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    Navigator.of(context).pop(true);
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Erro ao finalizar mesa: $e'),
+        backgroundColor: Colors.red,
+      ),
+    );
+    setState(() => isLoading = false);
+  }
+}
+
+Future<String> _generateFinalizacaoContent() async {
+  StringBuffer conteudo = StringBuffer();
+
+  conteudo.writeln('\n');  
+  conteudo.writeln('=' * 30); 
+  conteudo.writeln('    FECHAMENTO DE MESA    '.toUpperCase());
+  conteudo.writeln('=' * 30);
+  conteudo.writeln('\n');
+
+  // Date and Time
+  final now = DateTime.now();
+  conteudo.writeln('DATA: ${now.day}/${now.month}/${now.year}'.toUpperCase());
+  conteudo.writeln('HORA: ${now.hour}:${_formatMinute(now.minute)}'.toUpperCase());
+  conteudo.writeln('\n');
+
+  // Mesa Details
+  conteudo.writeln('MESA: ${widget.mesaId}');
+  conteudo.writeln('\n');
+
+  // Products Details
+  conteudo.writeln('DETALHAMENTO');
+  conteudo.writeln('----------------------------');
+
+  for (var produto in allProducts) {
+    conteudo.writeln('${produto['nome']} (x${produto['qtd']})');
+    conteudo.writeln('UN: R\$ ${produto['preco'].toStringAsFixed(2)}');
+    conteudo.writeln('SUBTOTAL: R\$ ${produto['subtotal'].toStringAsFixed(2)}');
+    conteudo.writeln('----------------------------');
+  }
+
+  // Total
+  conteudo.writeln('\nTOTAL: R\$ ${totalAllOrders.toStringAsFixed(2)}');
+  conteudo.writeln('\n============================');
+
+  return conteudo.toString();
+}
+
+// Helper method to format minute with leading zero
+String _formatMinute(int minute) {
+  return minute < 10 ? '0$minute' : minute.toString();
+}
+
+// Add this method to handle printing
+Future<void> _printOrder(String content) async {
+  try {
+    final bytes = await _printerService.printContent(content);
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Mesa finalizada com sucesso!'),
+          content: Text('Fechamento de mesa enviado para impressora'),
           backgroundColor: Colors.green,
         ),
       );
-
-      Navigator.of(context).pop(true);
-    } catch (e) {
+    }
+  } catch (e) {
+    if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Erro ao finalizar mesa: $e'),
+          content: Text('Erro ao imprimir: $e'),
           backgroundColor: Colors.red,
         ),
       );
-      setState(() => isLoading = false);
     }
   }
+}
 
   Future<void> _confirmarFinalizacao() async {
     showDialog(
