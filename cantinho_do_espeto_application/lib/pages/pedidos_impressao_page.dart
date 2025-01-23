@@ -203,6 +203,7 @@ class _TelaPedidosTxtState extends State<TelaPedidosTxt> with SingleTickerProvid
       // Generate content
       final conteudo = await _generateOrderContent(pedidoId, pedidoData);
       
+
       // Print the order if printer is connected
       if (_printerService.isConnected) {
         await _printOrder(conteudo);
@@ -233,16 +234,18 @@ class _TelaPedidosTxtState extends State<TelaPedidosTxt> with SingleTickerProvid
   Future<String> _generateOrderContent(String pedidoId, Map<String, dynamic> pedidoData) async {
     StringBuffer conteudo = StringBuffer();
 
-    // Header
-    conteudo.writeln('============================');
-    conteudo.writeln('       PEDIDO #$pedidoId      ');
-    conteudo.writeln('============================\n');
+    
+    conteudo.writeln('\n');  
+    conteudo.writeln('=' * 30); 
+    conteudo.writeln('       PEDIDO #$pedidoId      '.toUpperCase());
+    conteudo.writeln('=' * 30);
+    conteudo.writeln('\n');
 
-    // Date and time
     final timestamp = pedidoData['dataCriacao'] as Timestamp?;
     final data = timestamp?.toDate() ?? DateTime.now();
-    conteudo.writeln('Data: ${data.day}/${data.month}/${data.year}');
-    conteudo.writeln('Hora: ${data.hour}:${data.minute}\n');
+    conteudo.writeln('DATA: ${data.day}/${data.month}/${data.year}'.toUpperCase());
+    conteudo.writeln('HORA: ${data.hour}:${data.minute}'.toUpperCase());
+    conteudo.writeln('\n');
 
     // Client data
     conteudo.writeln('CLIENTE');

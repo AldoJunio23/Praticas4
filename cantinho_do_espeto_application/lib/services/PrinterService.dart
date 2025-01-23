@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_pos_printer_platform_image_3/flutter_pos_printer_platform_image_3.dart';
 import 'dart:convert' show latin1;
@@ -11,11 +13,11 @@ class PrinterService {
   PrinterDevice? _selectedPrinter;
   bool _isConnected = false;
   bool _isInitialized = false;
+  
 
-  // Constants for TM-T20X
   static const String printerModel = 'Epson-TM-T20X';
-  static const int vendorId = 0x04b8;  // Epson vendor ID
-  static const int productId = 0x0e28;  // TM-T20X product ID
+  static const int vendorId = 0x04b8;
+  static const int productId = 0x0e28; 
 
   Future<bool> initializePrinter() async {
     if (_isInitialized) return _isConnected;
@@ -39,6 +41,9 @@ class PrinterService {
       return false;
     }
   }
+
+  
+  
 
   Future<bool> connectToPrinter(BuildContext context) async {
     if (!_isInitialized) {
@@ -104,32 +109,36 @@ class PrinterService {
     }
   }
 
-  Future<List<int>> printContent(String content) async {
+  Future<List<int>> printContent(String content, {bool largeFontMode = true}) async {
     if (!_isConnected || _printerManager == null) {
       throw Exception('Impressora não está conectada');
     }
 
     try {
       List<int> bytes = [];
-      
+
       // Comandos específicos para TM-T20X
       bytes.addAll([0x1B, 0x40]); // ESC @ - Initialize printer
       bytes.addAll([0x1B, 0x74, 0x02]); // ESC t - Select character code table (PC852)
-      
-      // Configurar tamanho do texto
-      bytes.addAll([0x1B, 0x21, 0x00]); // ESC ! - Select print mode (normal)
-      
-      // Adicionar o conteúdo
+
+      // Configure text size
+      if (largeFontMode) {
+        bytes.addAll([0x1B, 0x21, 0x20]); // ESC ! - Select print mode (double-height and double-width)
+      } else {
+        bytes.addAll([0x1B, 0x21, 0x00]); // ESC ! - Select print mode (normal)
+      }
+
+      // Add the content
       bytes.addAll(latin1.encode(content));
-      
-      // Alimentar papel e cortar
+
+      // Feed paper and cut
       bytes.addAll([0x0A, 0x0A, 0x0A]); // Line feeds
       bytes.addAll([0x1D, 0x56, 0x41, 0x00]); // GS V A - Full cut
 
       debugPrint('Enviando dados para impressora $printerModel...');
       await _printerManager?.send(type: PrinterType.usb, bytes: bytes);
       debugPrint('Dados enviados com sucesso');
-      
+
       return bytes;
     } catch (e, stackTrace) {
       debugPrint('Erro ao imprimir: $e');
@@ -137,16 +146,15 @@ class PrinterService {
       throw Exception('Falha ao imprimir: $e');
     }
   }
-
-  void _showMessage(BuildContext context, String message, {bool isError = false}) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: isError ? Colors.red : Colors.green,
-        ),
-      );
-    }
+    void _showMessage(BuildContext context, String message, {bool isError = false}) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+            backgroundColor: isError ? Colors.red : Colors.green,
+          ),
+        );
+      }
   }
 
   Future<void> disconnect() async {
