@@ -15,8 +15,6 @@ class TelaDetalhesMesas extends StatefulWidget {
   @override
   TelaDetalhesMesasState createState() => TelaDetalhesMesasState();
 }
-
-
 class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
   bool isOcupada = false;
   int? _numMesa;
@@ -37,13 +35,12 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
 
   Future<void> _initializeFirebase() async {
     try {
-      // Verifica se o Firebase está inicializado
       if (!Firebase.apps.isNotEmpty) {
         await Firebase.initializeApp(
           options: DefaultFirebaseOptions.currentPlatform,
         );
       }
-      await _safeLoadMesaData();
+      await _carregarDadosMesa(); // Changed from _safeLoadMesaData to _carregarDadosMesa
     } catch (e) {
       print('Erro na inicialização do Firebase: $e');
       if (mounted) {
@@ -53,6 +50,51 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
             backgroundColor: Colors.red,
           ),
         );
+      }
+    }
+  }
+
+  Future<void> _carregarDadosMesa() async {
+    if (!mounted) return;
+    
+    setState(() => isLoading = true);
+    
+    try {
+       await Firebase.initializeApp();
+      // Get mesa data
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('Mesas')
+          .doc(widget.mesaId)
+          .get();
+
+      if (!doc.exists) {
+        throw Exception('Mesa não encontrada');
+      }
+
+      // Get active orders
+      QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
+          .collection('Pedidos')
+          .where('mesa', isEqualTo: doc.reference)
+          .where('finalizado', isEqualTo: false)
+          .get();
+
+      if (mounted) {
+        setState(() {
+          isOcupada = pedidosSnapshot.docs.isNotEmpty || doc['status'] == true;
+          _numMesa = doc['numMesa'];
+          mesaRef = doc.reference;
+        });
+      }
+
+      await _carregarTodosPedidos();
+
+    } catch (e) {
+      if (mounted) {
+        _mostrarErro('Erro ao carregar dados da mesa: $e');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
       }
     }
   }
@@ -110,80 +152,6 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
         }
     }
 }
-
-  Future<void> _carregarDadosMesa() async {
-  setState(() => isLoading = true);
-  try {
-    // Obtém os dados da mesa
-    DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('Mesas')
-        .doc(widget.mesaId)
-        .get();
-
-    if (doc.exists) {
-      setState(() {
-        isOcupada = doc['status'] ?? false;
-        _numMesa = doc['numMesa'];
-      });
-
-      mesaRef = doc.reference;
-      
-      QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
-          .collection('Pedidos')
-          .where('mesa', isEqualTo: mesaRef)
-          .where('finalizado', isEqualTo: false)
-          .get();
-
-      // Se houver pedidos em aberto, ajusta para ocupada
-      if (pedidosSnapshot.docs.isNotEmpty) {
-        await FirebaseFirestore.instance
-          .collection('Mesas')
-          .doc(widget.mesaId)
-          .update({'status': true});
-          
-        setState(() => isOcupada = true);
-      }
-      
-
-      // Carrega os pedidos relacionados
-      await _carregarTodosPedidos();
-      
-    }
-  } catch (e) {
-    _mostrarErro('Erro ao carregar dados da mesa: $e');
-  } finally {
-    setState(() => isLoading = false);
-    
-  }
-}
-
-  Future<void> _safeLoadMesaData() async {
-  if (!mounted) return;
-  
-  try {
-    setState(() => isLoading = true);
-    
-    await Future.delayed(Duration.zero); // Garante que estamos no frame correto
-    
-    final result = await compute(_fetchMesaData, widget.mesaId);
-    
-    if (!mounted) return;
-    
-    setState(() {
-      isOcupada = result['isOcupada'];
-      _numMesa = result['numMesa'];
-      mesaRef = result['mesaRef'];
-    });
-    
-    await _carregarTodosPedidos();
-  } catch (e) {
-    if (!mounted) return;
-    _handleError('Erro ao carregar dados da mesa: $e');
-  } finally {
-    if (!mounted) return;
-    setState(() => isLoading = false);
-  }
-}
   
   void _handleError(String message, {bool showSnackBar = true}) {
     print(message); // Log para console
@@ -198,28 +166,6 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
     }
   }
 
-  static Future<Map<String, dynamic>> _fetchMesaData(String mesaId) async {
-    DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('Mesas')
-        .doc(mesaId)
-        .get();
-
-    if (!doc.exists) {
-      throw Exception('Mesa não encontrada');
-    }
-
-    QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
-        .collection('Pedidos')
-        .where('mesa', isEqualTo: doc.reference)
-        .where('finalizado', isEqualTo: false)
-        .get();
-
-    return {
-      'isOcupada': pedidosSnapshot.docs.isNotEmpty || doc['status'] == true,
-      'numMesa': doc['numMesa'],
-      'mesaRef': doc.reference,
-    };
-  }
 
   Future<String> _criarPedido() async {
     // Primeiro, garante que temos a referência correta da mesa
@@ -248,6 +194,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
 
   Future<void> _carregarTodosPedidos() async {
     try {
+      await Firebase.initializeApp();
       QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
           .collection('Pedidos')
           .where('mesa', isEqualTo: mesaRef)
