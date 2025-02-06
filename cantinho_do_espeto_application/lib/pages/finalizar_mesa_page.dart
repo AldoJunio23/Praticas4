@@ -20,14 +20,14 @@ class _FinalizarMesaPageState extends State<FinalizarMesaPage> {
   final PrinterService _printerService = PrinterService();
   bool isLoading = true;
   List<Map<String, dynamic>> allProducts = [];
-  double totalAllOrders = 0.0;
+  double valorTotalPedidos = 0.0;
   DocumentReference? mesaRef;
+  
 
   @override
   void initState() {
     super.initState();
     _loadMesaReference();
-    _carregarTodosPedidos();
     _initializePrinter();
   }
 
@@ -43,70 +43,49 @@ class _FinalizarMesaPageState extends State<FinalizarMesaPage> {
     _printerService.disconnect();
     super.dispose();
   }
-
+  
   Future<void> _loadMesaReference() async {
     mesaRef = FirebaseFirestore.instance.collection('Mesas').doc(widget.mesaId);
   }
 
-  Future<void> _carregarTodosPedidos() async {
-    setState(() => isLoading = true);
-    try {
-      QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
-          .collection('Pedidos')
-          .where('mesa', isEqualTo: mesaRef)
-          .get();
 
-      List<Map<String, dynamic>> todosProdutos = [];
-      Map<String, int> produtoQuantidades = {};
-      Map<String, double> produtoPrecos = {};
-      double total = 0.0;
+  Future<List<Map<String, dynamic>>> _processarPedidos(List<QueryDocumentSnapshot> pedidos) async {
+    Map<String, Map<String, dynamic>> produtosMap = {};
+    double total = 0;
 
-      for (var pedidoDoc in pedidosSnapshot.docs) {
-        Map<String, dynamic> pedido = pedidoDoc.data() as Map<String, dynamic>;
-        List<DocumentReference> produtosRefs = List<DocumentReference>.from(pedido['listaProdutos'] ?? []);
+    for (var pedido in pedidos) {
+      final pedidoData = pedido.data() as Map<String, dynamic>;
+      final List<DocumentReference> produtosRefs = 
+        List<DocumentReference>.from(pedidoData['listaProdutos'] ?? []);
 
-        for (var produtoRef in produtosRefs) {
-          DocumentSnapshot produtoDoc = await produtoRef.get();
-          if (produtoDoc.exists) {
-            Map<String, dynamic> produtoData = produtoDoc.data() as Map<String, dynamic>;
-            String produtoId = produtoDoc.id;
-            String nome = produtoData['nome'] ?? 'Produto desconhecido';
-            double preco = produtoData['valor']?.toDouble() ?? 0.0;
-            String imagemUrl = produtoData['imagem'] ?? '';
-
-            produtoQuantidades[produtoId] = (produtoQuantidades[produtoId] ?? 0) + 1;
-            produtoPrecos[produtoId] = preco;
-
-            if (!todosProdutos.any((p) => p['id'] == produtoId)) {
-              todosProdutos.add({
-                'id': produtoId,
-                'nome': nome,
-                'preco': preco,
-                'imagem': imagemUrl,
-              });
-            }
-
-            total += preco;
+      for (var ref in produtosRefs) {
+        final doc = await ref.get();
+        if (doc.exists) {
+          final produto = doc.data() as Map<String, dynamic>;
+          final produtoId = doc.id;
+          
+          if (produtosMap.containsKey(produtoId)) {
+            produtosMap[produtoId]!['quantidade'] = 
+              (produtosMap[produtoId]!['quantidade'] as int) + 1;
+          } else {
+            produtosMap[produtoId] = {
+              ...produto,
+              'quantidade': 1,
+              'id': produtoId,
+            };
           }
+          
+          total += produto['valor']?.toDouble() ?? 0.0;
         }
       }
-
-      for (var produto in todosProdutos) {
-        String produtoId = produto['id'];
-        produto['qtd'] = produtoQuantidades[produtoId] ?? 0;
-        produto['subtotal'] = (produtoQuantidades[produtoId] ?? 0) * (produtoPrecos[produtoId] ?? 0.0);
-      }
-
-      setState(() {
-        allProducts = todosProdutos;
-        totalAllOrders = total;
-        isLoading = false;
-      });
-
-    } catch (e) {
-      print('Erro ao carregar todos os pedidos: $e');
-      setState(() => isLoading = false);
     }
+
+    setState(() {
+      valorTotalPedidos = total;
+      isLoading = false;
+    });
+
+    return produtosMap.values.toList();
   }
 
   Future<void> _finalizarMesa() async {
@@ -187,24 +166,33 @@ Future<String> _generateFinalizacaoContent() async {
   conteudo.writeln('HORA: ${now.hour}:${_formatMinute(now.minute)}'.toUpperCase());
   conteudo.writeln('\n');
 
-  // Mesa Details
-  conteudo.writeln('MESA: ${widget.mesaId}');
-  conteudo.writeln('\n');
 
-  // Products Details
-  conteudo.writeln('DETALHAMENTO');
-  conteudo.writeln('----------------------------');
+  // Detalhes da Mesa
+  final mesaDoc = await mesaRef?.get();
+  final mesaData = mesaDoc?.data() as Map<String, dynamic>?;
+  final numMesa = mesaData?['numMesa'] ?? 'N/A';
+  conteudo.writeln('MESA: $numMesa');
+  conteudo.writeln('\nPRODUTOS');
+  conteudo.writeln('-' * 30);
 
-  for (var produto in allProducts) {
-    conteudo.writeln('${produto['nome']} (x${produto['qtd']})');
-    conteudo.writeln('UN: R\$ ${produto['preco'].toStringAsFixed(2)}');
-    conteudo.writeln('SUBTOTAL: R\$ ${produto['subtotal'].toStringAsFixed(2)}');
-    conteudo.writeln('----------------------------');
+  // Buscar produtos novamente para garantir dados atualizados
+  QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
+      .collection('Pedidos')
+      .where('mesa', isEqualTo: mesaRef)
+      .where('finalizado', isEqualTo: false)
+      .get();
+
+  List<Map<String, dynamic>> produtos = await _processarPedidos(pedidosSnapshot.docs);
+
+  for (var produto in produtos) {
+    conteudo.writeln('${produto['nome']} (x${produto['quantidade']})');
+    conteudo.writeln('UN: R\$ ${produto['valor'].toStringAsFixed(2)}');
+    conteudo.writeln('SUB: R\$ ${(produto['valor'] * produto['quantidade']).toStringAsFixed(2)}');
+    conteudo.writeln('-' * 30);
   }
 
-  // Total
-  conteudo.writeln('\nTOTAL: R\$ ${totalAllOrders.toStringAsFixed(2)}');
-  conteudo.writeln('\n============================');
+  conteudo.writeln('\nTOTAL: R\$ ${valorTotalPedidos.toStringAsFixed(2)}');
+  conteudo.writeln('\n' + '=' * 30);
 
   return conteudo.toString();
 }
@@ -245,9 +233,7 @@ Future<void> _printOrder(String content) async {
         return AlertDialog(
           title: const Text(
             'Confirmar Finalização',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -259,7 +245,7 @@ Future<void> _printOrder(String content) async {
               ),
               const SizedBox(height: 12),
               Text(
-                'Total a pagar: R\$ ${totalAllOrders.toStringAsFixed(2)}',
+                'Total a pagar: R\$ ${valorTotalPedidos.toStringAsFixed(2)}',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -271,10 +257,7 @@ Future<void> _printOrder(String content) async {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                'Cancelar',
-                style: TextStyle(color: Colors.red),
-              ),
+              child: const Text('Cancelar', style: TextStyle(color: Colors.red)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -300,147 +283,134 @@ Future<void> _printOrder(String content) async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        iconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        title: const Text(
-          'Finalizar Mesa',
-          style: TextStyle(color: Colors.white),
-        ),
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.orange[900]!, Colors.orange[800]!],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+        title: const Text('Finalizar Mesa', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.orange[900],
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('Pedidos')
+            .where('mesa', isEqualTo: mesaRef)
+            .where('finalizado', isEqualTo: false)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('Nenhum pedido encontrado para esta mesa'));
+          }
+
+          final pedidos = snapshot.data!.docs;
+          
+          return FutureBuilder<List<Map<String, dynamic>>>(
+            future: _processarPedidos(pedidos),
+            builder: (context, processedSnapshot) {
+              if (!processedSnapshot.hasData) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final produtos = processedSnapshot.data!;
+              
+              return Column(
+                children: [
+                  _buildTotalHeader(),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: produtos.length,
+                      itemBuilder: (context, index) => _buildProdutoCard(produtos[index]),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
+      bottomNavigationBar: _buildBottomButton(),
+    );
+  }
+  Widget _buildTotalHeader() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange[50],
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text(
+            'Total a Pagar',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            'R\$ ${valorTotalPedidos.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange[900],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProdutoCard(Map<String, dynamic> produto) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: ListTile(
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            produto['imagem'] ?? '',
+            width: 50,
+            height: 50,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 50,
+              height: 50,
+              color: Colors.grey[200],
+              child: const Icon(Icons.error),
             ),
           ),
         ),
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.orange[50],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Total a Pagar',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        'R\$ ${totalAllOrders.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange[900],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: allProducts.length,
-                    itemBuilder: (context, index) {
-                      final produto = allProducts[index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          leading: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              produto['imagem'],
-                              width: 50,
-                              height: 50,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                width: 50,
-                                height: 50,
-                                color: Colors.grey[200],
-                                child: const Icon(Icons.error),
-                              ),
-                            ),
-                          ),
-                          title: Text(
-                            produto['nome'],
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Preço unitário: R\$ ${produto['preco'].toStringAsFixed(2)}',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                              Text(
-                                'Subtotal: R\$ ${produto['subtotal'].toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  color: Colors.green,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                          trailing: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.orange[100],
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              'x${produto['qtd']}',
-                              style: TextStyle(
-                                color: Colors.orange[900],
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
+        title: Text(
+          produto['nome'],
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Preço unitário: R\$ ${produto['valor'].toStringAsFixed(2)}',
+              style: TextStyle(color: Colors.grey[600]),
             ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 4,
-              offset: const Offset(0, -2),
+            Text(
+              'Subtotal: R\$ ${(produto['valor'] * produto['quantidade']).toStringAsFixed(2)}',
+              style: const TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.green,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+        trailing: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.orange[100],
+            borderRadius: BorderRadius.circular(20),
           ),
-          onPressed: _confirmarFinalizacao, // Alterado para chamar o diálogo de confirmação
-          child: const Text(
-            'Finalizar Mesa',
+          child: Text(
+            'x${produto['quantidade']}',
             style: TextStyle(
-              fontSize: 18,
-              color: Colors.white,
+              color: Colors.orange[900],
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -448,4 +418,39 @@ Future<void> _printOrder(String content) async {
       ),
     );
   }
+
+  Widget _buildBottomButton() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+        onPressed: _confirmarFinalizacao,
+        child: const Text(
+          'Finalizar Mesa',
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
 }

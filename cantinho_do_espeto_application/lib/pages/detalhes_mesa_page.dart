@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_application_praticas/pages/adicionar_produtos_page.dart';
 import 'package:flutter_application_praticas/pages/finalizar_mesa_page.dart';
 import '../services/pedido_service.dart';
+import 'package:firebase_core/firebase_core.dart';
+import '../firebase_options.dart';
 
 class TelaDetalhesMesas extends StatefulWidget {
   final String mesaId;
@@ -12,6 +15,7 @@ class TelaDetalhesMesas extends StatefulWidget {
   @override
   TelaDetalhesMesasState createState() => TelaDetalhesMesasState();
 }
+
 
 class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
   bool isOcupada = false;
@@ -28,7 +32,29 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
   @override
   void initState() {
     super.initState();
-    _carregarDadosMesa();
+    _initializeFirebase();
+  }
+
+  Future<void> _initializeFirebase() async {
+    try {
+      // Verifica se o Firebase está inicializado
+      if (!Firebase.apps.isNotEmpty) {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      }
+      await _safeLoadMesaData();
+    } catch (e) {
+      print('Erro na inicialização do Firebase: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro na conexão com o banco de dados: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _finalizarPedido(String pedidoId, BuildContext context) async {
@@ -101,8 +127,7 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
       });
 
       mesaRef = doc.reference;
-
-      // Verifica se há pedidos não finalizados para esta mesa
+      
       QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
           .collection('Pedidos')
           .where('mesa', isEqualTo: mesaRef)
@@ -122,13 +147,79 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
 
       // Carrega os pedidos relacionados
       await _carregarTodosPedidos();
+      
     }
   } catch (e) {
     _mostrarErro('Erro ao carregar dados da mesa: $e');
   } finally {
     setState(() => isLoading = false);
+    
   }
 }
+
+  Future<void> _safeLoadMesaData() async {
+  if (!mounted) return;
+  
+  try {
+    setState(() => isLoading = true);
+    
+    await Future.delayed(Duration.zero); // Garante que estamos no frame correto
+    
+    final result = await compute(_fetchMesaData, widget.mesaId);
+    
+    if (!mounted) return;
+    
+    setState(() {
+      isOcupada = result['isOcupada'];
+      _numMesa = result['numMesa'];
+      mesaRef = result['mesaRef'];
+    });
+    
+    await _carregarTodosPedidos();
+  } catch (e) {
+    if (!mounted) return;
+    _handleError('Erro ao carregar dados da mesa: $e');
+  } finally {
+    if (!mounted) return;
+    setState(() => isLoading = false);
+  }
+}
+  
+  void _handleError(String message, {bool showSnackBar = true}) {
+    print(message); // Log para console
+    
+    if (showSnackBar && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  static Future<Map<String, dynamic>> _fetchMesaData(String mesaId) async {
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('Mesas')
+        .doc(mesaId)
+        .get();
+
+    if (!doc.exists) {
+      throw Exception('Mesa não encontrada');
+    }
+
+    QuerySnapshot pedidosSnapshot = await FirebaseFirestore.instance
+        .collection('Pedidos')
+        .where('mesa', isEqualTo: doc.reference)
+        .where('finalizado', isEqualTo: false)
+        .get();
+
+    return {
+      'isOcupada': pedidosSnapshot.docs.isNotEmpty || doc['status'] == true,
+      'numMesa': doc['numMesa'],
+      'mesaRef': doc.reference,
+    };
+  }
 
   Future<String> _criarPedido() async {
     // Primeiro, garante que temos a referência correta da mesa
@@ -215,6 +306,8 @@ class TelaDetalhesMesasState extends State<TelaDetalhesMesas> {
       print('Erro ao carregar todos os pedidos: $e');
     }
   }
+
+  
  Future<void> _carregarProdutos(
   List<DocumentReference<Object?>> produtosRefs) async {
     try {

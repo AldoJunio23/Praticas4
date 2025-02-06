@@ -68,7 +68,7 @@ class PrinterService {
         debugPrint('Impressora encontrada: ${device.name} (VID: ${device.vendorId}, PID: ${device.productId})');
         
 
-        if (device.name?.contains(printerModel) ?? false) {
+        if (device.name.contains(printerModel) ?? false) {
           _selectedPrinter = device;
           printerFound = true;
           break;

@@ -1,0 +1,7 @@
+{
+    "cmake.sourceDirectory": "C:/github/Praticas4/cantinho_do_espeto_application/linux",
+    "files.associations": {
+        "xstring": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}
