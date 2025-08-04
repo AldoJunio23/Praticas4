@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_praticas/components/custom_drawer.dart';
+import 'package:flutter_application_praticas/pages/TelaFecharMesas.dart';
 import 'package:flutter_application_praticas/pages/cardapio_page.dart';
 import 'package:flutter_application_praticas/pages/cliente_pedidos_page.dart';
 import 'package:flutter_application_praticas/pages/pedidos_impressao_page.dart';
@@ -111,6 +112,15 @@ class HomePageState extends State<HomePage> {
                      onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const TelaCardapio()),
+                      ),
+                    ),
+                    _buildMenuCard(
+                      context: context,
+                      title: 'Fechar Mesas',
+                      icon: Icons.table_bar_outlined,
+                     onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const TelaFecharMesas()),
                       ),
                     ),
                   ],

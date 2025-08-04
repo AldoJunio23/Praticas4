@@ -1,10 +1,13 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_praticas/pages/home_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart'; 
 import 'firebase_options.dart';
-import 'pages/finalizacao_mesa_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 
 void main() async {
@@ -12,6 +15,14 @@ void main() async {
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
   );
+  
+  if (Platform.isWindows) {
+      print('Esta no windows');
+      FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: false,
+      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+    );
+  }
 
   runApp(const MyApp());
 }
@@ -34,7 +45,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       title: 'Cantinho do Espeto',
-      home: const TelaFinalizacaoMesas(),
+      home: const HomePage(),
     );
   }
 }

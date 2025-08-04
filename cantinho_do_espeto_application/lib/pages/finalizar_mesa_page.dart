@@ -192,7 +192,7 @@ Future<String> _generateFinalizacaoContent() async {
   }
 
   conteudo.writeln('\nTOTAL: R\$ ${valorTotalPedidos.toStringAsFixed(2)}');
-  conteudo.writeln('\n' + '=' * 30);
+  conteudo.writeln('\n${'=' * 30}');
 
   return conteudo.toString();
 }
