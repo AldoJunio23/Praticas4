@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_application_praticas/pages/finalizacao_mesa_page.dart';
+import 'package:flutter_application_praticas/pages/finalizar_mesa_page.dart';
 import 'package:flutter_application_praticas/pages/home_page.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:google_fonts/google_fonts.dart'; 
@@ -45,7 +47,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       title: 'Cantinho do Espeto',
-      home: const HomePage(),
+      home: const TelaFinalizacaoMesas(),
     );
   }
 }
