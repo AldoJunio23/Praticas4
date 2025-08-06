@@ -24,6 +24,10 @@ app.get('/getMesas', async (req, res) => {
     }
 });
 
+app.get('/teste', async (req, res) => {
+   res.json("teste")
+});
+
 // 1. Carregar dados de uma mesa específica
 app.get('/mesa/:mesaId', async (req, res) => {
     try {

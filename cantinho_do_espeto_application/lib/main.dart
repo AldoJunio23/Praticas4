@@ -17,14 +17,6 @@ void main() async {
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  if (Platform.isWindows) {
-      print('Esta no windows');
-      FirebaseFirestore.instance.settings = const Settings(
-      persistenceEnabled: false,
-      cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
-    );
-  }
 
   runApp(const MyApp());
 }
@@ -47,7 +39,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       title: 'Cantinho do Espeto',
-      home: const TelaFinalizacaoMesas(),
+      home: const HomePage(),
     );
   }
 }
